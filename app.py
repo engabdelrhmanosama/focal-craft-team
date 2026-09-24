@@ -8,50 +8,48 @@ import base64
 from PIL import Image
 
 # ==========================================
-# 1. تحميل صورة اللوجو وإعدادات الصفحة
+# 1. إعدادات الصفحة والأيقونة
 # ==========================================
-try:
-    logo = Image.open("logo.jpg")
-except Exception:
-    try:
-        logo = Image.open("logo.jpg.jpeg")
-    except Exception:
-        logo = None
+logo_file = None
+for name in ["logo.jpg", "logo.jpg.jpeg", "logo.png", "logo.jpeg"]:
+    if os.path.exists(name):
+        logo_file = name
+        break
 
-# إعدادات الصفحة (يجب أن تكون في البداية)
-if logo:
+logo_img = Image.open(logo_file) if logo_file else None
+
+if logo_img:
     st.set_page_config(
-        page_title="فوكال كرافت تيم - Focal Craft Team",
-        page_icon=logo,
+        page_title="Focal Craft Team",
+        page_icon=logo_img,
         layout="wide"
     )
 else:
     st.set_page_config(
-        page_title="فوكال كرافت تيم - Focal Craft Team",
+        page_title="Focal Craft Team",
         page_icon="🎬",
         layout="wide"
     )
 
-# دالة تحويل الصورة إلى Base64 للخلفية
 def get_image_base64(image_path):
     if image_path and os.path.exists(image_path):
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
     return ""
 
-logo_file = "logo.jpg" if os.path.exists("logo.jpg") else ("logo.jpg.jpeg" if os.path.exists("logo.jpg.jpeg") else None)
-logo_base64 = get_image_base64(logo_file) if logo_file else ""
+logo_base64 = get_image_base64(logo_file)
 
 # ==========================================
-# 2. قواعد البيانات (SQLite)
+# 2. قواعد البيانات (SQLite) مع إصلاح الخطأ
 # ==========================================
 DB_FILE = "focal_craft.db"
+
+def hash_pass(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    
-    # جدول المستخدمين
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,8 +59,6 @@ def init_db():
             name TEXT NOT NULL
         )
     ''')
-    
-    # جدول الباقات
     c.execute('''
         CREATE TABLE IF NOT EXISTS packages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,23 +67,18 @@ def init_db():
             details TEXT
         )
     ''')
-    
-    # إنشاء حساب Owner افتراضي إذا لم يكن موجوداً
     c.execute("SELECT * FROM users WHERE username = 'admin'")
     if not c.fetchone():
-        hashed_pw = hashlib.sha256("admin123".encode()).hexdigest()
+        hashed_pw = hash_pass("admin123")
         c.execute("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
-                  ('admin', hashed_pw, 'Owner', 'باشمهندس عبد الرحمن'))
-    
+                  ('admin', hashed_pw, 'Owner', 'Eng Abdelrhman Osama'))
     conn.commit()
     conn.close()
 
 init_db()
 
-def hash_pass(password):
-    return hashlib.sha256(password.encode()).hexdigest()
-
 def check_login(username, password):
+    init_db()
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("SELECT username, role, name FROM users WHERE username = ? AND password = ?", 
@@ -97,35 +88,90 @@ def check_login(username, password):
     return user
 
 # ==========================================
-# 3. إدارة الجلسة (Session State)
+# 3. إدارة الجلسة واللغة (Session State)
 # ==========================================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
+if "lang" not in st.session_state:
+    st.session_state.lang = "EN"  # الافتراضي إنجليزي
+
+# قاموس اللغات (Dictionary for Translations)
+translations = {
+    "EN": {
+        "title": "Focal Craft Team",
+        "subtitle": "Unified Company Management System",
+        "username": "Username",
+        "password": "Password",
+        "login_btn": "Login",
+        "login_success": "Logged in successfully!",
+        "login_error": "Invalid username or password",
+        "welcome": "Welcome",
+        "role": "Role",
+        "nav": "Navigation",
+        "home": "Home Page",
+        "cs": "Customer Service",
+        "packages": "Packages Management",
+        "employees": "Employees Management",
+        "audit": "Accounts & Audit",
+        "logout": "Logout",
+        "status": "System Status",
+        "active": "Active 🟢",
+        "add_pkg": "Add New Package",
+        "pkg_name": "Package Name",
+        "price": "Price",
+        "details": "Details",
+        "save": "Save",
+        "add_emp": "Add New Employee",
+        "fullname": "Full Name",
+        "emp_added": "Employee added successfully!",
+        "user_exists": "Username already exists!"
+    },
+    "AR": {
+        "title": "فوكال كرافت تيم",
+        "subtitle": "نظام إدارة الشركة الموحد",
+        "username": "اسم المستخدم",
+        "password": "كلمة المرور",
+        "login_btn": "تسجيل الدخول",
+        "login_success": "تم تسجيل الدخول بنجاح!",
+        "login_error": "اسم المستخدم أو كلمة المرور غير صحيحة",
+        "welcome": "مرحباً بك",
+        "role": "الصلاحية",
+        "nav": "التنقل",
+        "home": "الصفحة الرئيسية",
+        "cs": "خدمة العملاء",
+        "packages": "إدارة الباقات",
+        "employees": "إدارة الموظفين",
+        "audit": "الحسابات والتدقيق",
+        "logout": "تسجيل الخروج",
+        "status": "حالة النظام",
+        "active": "نشط 🟢",
+        "add_pkg": "إضافة باقة جديدة",
+        "pkg_name": "اسم الباقة",
+        "price": "السعر",
+        "details": "التفاصيل",
+        "save": "حفظ",
+        "add_emp": "إضافة موظف جديد",
+        "fullname": "الاسم الكامل",
+        "emp_added": "تمت إضافة الموظف بنجاح!",
+        "user_exists": "اسم المستخدم موجود بالفعل!"
+    }
+}
+
+t = translations[st.session_state.lang]
 
 # ==========================================
 # 4. واجهة تسجيل الدخول (Login Screen)
 # ==========================================
 if not st.session_state.logged_in:
-    # خلفية وتنسيق شاشة تسجيل الدخول
     bg_style = f"""
     <style>
     .stApp {{
-        background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), 
+        background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
                     url('data:image/jpeg;base64,{logo_base64}');
         background-size: cover;
         background-position: center;
-    }}
-    .login-card {{
-        background-color: rgba(30, 41, 59, 0.9);
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        max-width: 400px;
-        margin: auto;
-        color: white;
-        text-align: center;
     }}
     </style>
     """
@@ -133,122 +179,126 @@ if not st.session_state.logged_in:
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if logo:
-            st.image(logo, width=150)
-        st.markdown("<h2 style='text-align: center; color: #f8fafc;'>Focal Craft Team</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #94a3b8;'>نظام إدارة الشركة الموحد</p>", unsafe_allow_html=True)
+        if logo_img:
+            st.image(logo_img, width=150)
+        st.markdown(f"<h2 style='text-align: center; color: #f8fafc;'>{t['title']}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<p style='text-align: center; color: #94a3b8;'>{t['subtitle']}</p>", unsafe_allow_html=True)
         
+        # اختيار اللغة في الشاشة الرئيسية
+        selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], horizontal=True)
+        st.session_state.lang = "EN" if selected_lang == "English" else "AR"
+        t = translations[st.session_state.lang]
+
         with st.form("login_form"):
-            username = st.text_input("اسم المستخدم")
-            password = st.text_input("كلمة المرور", type="password")
-            submit = st.form_submit_button("تسجيل الدخول", use_container_width=True)
+            username = st.text_input(t["username"])
+            password = st.text_input(t["password"], type="password")
+            submit = st.form_submit_button(t["login_btn"], use_container_width=True)
             
             if submit:
                 user = check_login(username, password)
                 if user:
                     st.session_state.logged_in = True
                     st.session_state.user_info = {"username": user[0], "role": user[1], "name": user[2]}
-                    st.success("تم تسجيل الدخول بنجاح!")
+                    st.success(t["login_success"])
                     st.rerun()
                 else:
-                    st.error("اسم المستخدم أو كلمة المرور غير صحيحة")
+                    st.error(t["login_error"])
 
 # ==========================================
-# 5. الواجهة الرئيسية للبرنامج (Dashboard)
+# 5. الواجهة الرئيسية (Dashboard)
 # ==========================================
 else:
-    # القائمة الجانبية (Sidebar)
     with st.sidebar:
-        if logo:
-            st.image(logo, use_container_width=True)
-        st.title("Focal Craft Team")
-        st.write(f"مرحباً بك: **{st.session_state.user_info['name']}**")
-        st.caption(f"الصلاحية: {st.session_state.user_info['role']}")
+        if logo_img:
+            st.image(logo_img, use_container_width=True)
+        st.title(t["title"])
+        st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
+        st.caption(f"{t['role']}: {st.session_state.user_info['role']}")
+        
+        # تحويل اللغة داخل الحساب
+        lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
+                               index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
+        st.session_state.lang = "EN" if lang_choice == "English" else "AR"
+        t = translations[st.session_state.lang]
+        
         st.divider()
         
-        # خيارات القائمة حسب الصلاحيات
         role = st.session_state.user_info["role"]
-        menu_options = ["الصفحة الرئيسية", "خدمة العملاء", "إدارة الباقات"]
+        menu_options = [t["home"], t["cs"], t["packages"]]
         if role == "Owner":
-            menu_options.extend(["إدارة الموظفين", "الحسابات والتدقيق"])
+            menu_options.extend([t["employees"], t["audit"]])
             
-        choice = st.radio("الانتقال إلى", menu_options)
+        choice = st.radio(t["nav"], menu_options)
         
         st.divider()
-        if st.button("تسجيل الخروج", use_container_width=True):
+        if st.button(t["logout"], use_container_width=True):
             st.session_state.logged_in = False
             st.session_state.user_info = None
             st.rerun()
 
     # --- 1. الصفحة الرئيسية ---
-    if choice == "الصفحة الرئيسية":
-        st.title("🎬 لوحة التحكم الرئيسية")
-        st.write("أهلاً بك في نظام إدارة شركة **Focal Craft**.")
+    if choice in [t["home"]]:
+        st.title(f"🎬 {t['home']}")
+        st.write(f"{t['welcome']} {st.session_state.user_info['name']}")
         
         col1, col2, col3 = st.columns(3)
-        col1.metric("حالة النظام", "نشط 🟢")
-        col2.metric("المستخدم الحالي", st.session_state.user_info["name"])
-        col3.metric("الصلاحية", st.session_state.user_info["role"])
+        col1.metric(t["status"], t["active"])
+        col2.metric(t["username"], st.session_state.user_info["username"])
+        col3.metric(t["role"], st.session_state.user_info["role"])
 
     # --- 2. خدمة العملاء ---
-    elif choice == "خدمة العملاء":
-        st.title("📞 قسم خدمة العملاء")
-        st.write("إدارة طلبات العملاء والاستفسارات.")
+    elif choice in [t["cs"]]:
+        st.title(f"📞 {t['cs']}")
 
     # --- 3. إدارة الباقات ---
-    elif choice == "إدارة الباقات":
-        st.title("📦 إدارة الباقات والخدمات")
-        
+    elif choice in [t["packages"]]:
+        st.title(f"📦 {t['packages']}")
         conn = sqlite3.connect(DB_FILE)
         
-        # إضافة باقة جديدة (للمالك فقط)
         if st.session_state.user_info["role"] == "Owner":
-            with st.expander("➕ إضافة باقة جديدة"):
+            with st.expander(f"➕ {t['add_pkg']}"):
                 with st.form("add_package_form"):
-                    p_name = st.text_input("اسم الباقة")
-                    p_price = st.number_input("السعر", min_value=0.0)
-                    p_details = st.text_area("تفاصيل الباقة")
-                    if st.form_submit_button("حفظ الباقة"):
+                    p_name = st.text_input(t["pkg_name"])
+                    p_price = st.number_input(t["price"], min_value=0.0)
+                    p_details = st.text_area(t["details"])
+                    if st.form_submit_button(t["save"]):
                         c = conn.cursor()
                         c.execute("INSERT INTO packages (name, price, details) VALUES (?, ?, ?)", 
                                   (p_name, p_price, p_details))
                         conn.commit()
-                        st.success("تمت إضافة الباقة بنجاح!")
+                        st.success(t["save"])
                         st.rerun()
         
-        # عرض الباقات
-        df_pkgs = pd.read_sql_query("SELECT id AS 'المعرف', name AS 'اسم الباقة', price AS 'السعر', details AS 'التفاصيل' FROM packages", conn)
+        df_pkgs = pd.read_sql_query("SELECT id, name, price, details FROM packages", conn)
         conn.close()
         st.dataframe(df_pkgs, use_container_width=True)
 
-    # --- 4. إدارة الموظفين (للمالك فقط) ---
-    elif choice == "إدارة الموظفين" and role == "Owner":
-        st.title("👥 إدارة الموظفين والحسابات")
-        
+    # --- 4. إدارة الموظفين ---
+    elif choice in [t["employees"]] and role == "Owner":
+        st.title(f"👥 {t['employees']}")
         conn = sqlite3.connect(DB_FILE)
         
-        with st.expander("➕ إضافة موظف جديد"):
+        with st.expander(f"➕ {t['add_emp']}"):
             with st.form("add_user_form"):
-                u_name = st.text_input("الاسم الكامل")
-                u_username = st.text_input("اسم المستخدم (Username)")
-                u_password = st.text_input("كلمة المرور", type="password")
-                u_role = st.selectbox("الصلاحية", ["Customer Service", "Editor", "Moderator", "Owner"])
-                if st.form_submit_button("إضافة الموظف"):
+                u_name = st.text_input(t["fullname"])
+                u_username = st.text_input(t["username"])
+                u_password = st.text_input(t["password"], type="password")
+                u_role = st.selectbox(t["role"], ["Customer Service", "Editor", "Moderator", "Owner"])
+                if st.form_submit_button(t["save"]):
                     try:
                         c = conn.cursor()
                         c.execute("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
                                   (u_username, hash_pass(u_password), u_role, u_name))
                         conn.commit()
-                        st.success("تمت إضافة الموظف بنجاح!")
+                        st.success(t["emp_added"])
                         st.rerun()
                     except sqlite3.IntegrityError:
-                        st.error("اسم المستخدم موجود بالفعل!")
+                        st.error(t["user_exists"])
         
-        df_users = pd.read_sql_query("SELECT id AS 'المعرف', name AS 'الاسم', username AS 'اسم المستخدم', role AS 'الصلاحية' FROM users", conn)
+        df_users = pd.read_sql_query("SELECT id, name, username, role FROM users", conn)
         conn.close()
         st.dataframe(df_users, use_container_width=True)
 
-    # --- 5. الحسابات والتدقيق (للمالك فقط) ---
-    elif choice == "الحسابات والتدقيق" and role == "Owner":
-        st.title("📊 الحسابات والتقارير الشهرية")
-        st.write("مراجعة الإيرادات والتدقيق المالي.")
+    # --- 5. الحسابات والتدقيق ---
+    elif choice in [t["audit"]] and role == "Owner":
+        st.title(f"📊 {t['audit']}")
