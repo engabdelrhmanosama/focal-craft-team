@@ -5,6 +5,7 @@ import hashlib
 import os
 import base64
 import json
+from datetime import datetime, timedelta
 from PIL import Image
 from io import BytesIO
 
@@ -74,7 +75,8 @@ def get_db_connection():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             price REAL NOT NULL,
-            details TEXT
+            details TEXT,
+            duration_days INTEGER DEFAULT 30
         )
     ''')
     
@@ -87,16 +89,30 @@ def get_db_connection():
             package_id INTEGER,
             notes TEXT,
             tasks_status TEXT DEFAULT '{}',
+            created_at TEXT,
             FOREIGN KEY (package_id) REFERENCES packages (id)
         )
     ''')
     
-    # Auto-Migration: إضافة العمود إذا كان الجدول قديماً
+    # Auto-Migrations
+    c.execute("PRAGMA table_info(packages)")
+    pkg_cols = [col[1] for col in c.fetchall()]
+    if 'duration_days' not in pkg_cols:
+        try:
+            c.execute("ALTER TABLE packages ADD COLUMN duration_days INTEGER DEFAULT 30")
+        except Exception:
+            pass
+
     c.execute("PRAGMA table_info(clients)")
-    columns = [column[1] for column in c.fetchall()]
-    if 'tasks_status' not in columns:
+    client_cols = [col[1] for col in c.fetchall()]
+    if 'tasks_status' not in client_cols:
         try:
             c.execute("ALTER TABLE clients ADD COLUMN tasks_status TEXT DEFAULT '{}'")
+        except Exception:
+            pass
+    if 'created_at' not in client_cols:
+        try:
+            c.execute("ALTER TABLE clients ADD COLUMN created_at TEXT")
         except Exception:
             pass
 
@@ -142,7 +158,6 @@ if "lang" not in st.session_state:
 if "theme" not in st.session_state:
     st.session_state.theme = "Dark"
 
-# Theme Application (Dark / Light)
 if st.session_state.theme == "Light":
     st.markdown("""
         <style>
@@ -180,6 +195,7 @@ translations = {
         "add_pkg": "Add New Package",
         "pkg_name": "Package Name",
         "price": "Price",
+        "pkg_duration": "Package Duration (Days)",
         "details": "Package Services (Separate with commas or new lines)",
         "save": "Save",
         "add_emp": "Add New User",
@@ -223,7 +239,9 @@ translations = {
         "exp_deleted": "Expense deleted successfully!",
         "no_clients": "No clients registered yet.",
         "no_pkg_assigned": "Client is not assigned to any package.",
-        "completion_rate": "Service Completion Rate:"
+        "completion_rate": "Service Completion Rate:",
+        "delete_client": "Delete Client (Owner Only)",
+        "client_deleted": "Client deleted successfully!"
     },
     "AR": {
         "title": "فوكال كرافت تيم",
@@ -248,6 +266,7 @@ translations = {
         "add_pkg": "إضافة باقة جديدة",
         "pkg_name": "اسم الباقة",
         "price": "السعر",
+        "pkg_duration": "مدة الباقة (بالأيام)",
         "details": "تفاصيل الخدمات (افصل بين كل خدمة بفاصلة أو سطر جديد)",
         "save": "حفظ",
         "add_emp": "إضافة مستخدم جديد",
@@ -291,7 +310,9 @@ translations = {
         "exp_deleted": "تم مسح المصروف بنجاح!",
         "no_clients": "لا يوجد عملاء مسجلين حالياً.",
         "no_pkg_assigned": "العميل غير مشترك في باقة حالياً.",
-        "completion_rate": "نسبة إنجاز الخدمات:"
+        "completion_rate": "نسبة إنجاز الخدمات:",
+        "delete_client": "حذف عميل (المالك فقط)",
+        "client_deleted": "تم حذف العميل بنجاح!"
     }
 }
 
@@ -356,7 +377,6 @@ else:
         st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
         st.caption(f"{t['role']}: {st.session_state.user_info['role']}")
         
-        # Language & Theme Controls
         lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
                                index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
         st.session_state.lang = "EN" if lang_choice == "English" else "AR"
@@ -419,24 +439,70 @@ else:
                             for service in services:
                                 initial_tasks[service] = False
                         
-                        c.execute("INSERT INTO clients (client_name, phone, package_id, notes, tasks_status) VALUES (?, ?, ?, ?, ?)",
-                                  (c_name, c_phone, pkg_id, c_notes, json.dumps(initial_tasks, ensure_ascii=False)))
+                        current_date_str = datetime.now().strftime("%Y-%m-%d")
+                        
+                        c.execute("INSERT INTO clients (client_name, phone, package_id, notes, tasks_status, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                                  (c_name, c_phone, pkg_id, c_notes, json.dumps(initial_tasks, ensure_ascii=False), current_date_str))
                         conn.commit()
                         st.success(t["client_added"])
                         st.rerun()
                     elif not pkg_options:
                         st.error(t["no_packages_err"])
 
-        # Display Clients DataFrame
+        # Display Clients DataFrame مع احتساب مدة الباقة المحددة
         df_clients = pd.read_sql_query('''
-            SELECT c.id, c.client_name, c.phone, p.name as package_name, p.price, c.notes 
+            SELECT c.id, c.client_name, c.phone, p.name as package_name, p.price, COALESCE(p.duration_days, 30) as duration_days, c.created_at, c.notes 
             FROM clients c 
             LEFT JOIN packages p ON c.package_id = p.id
         ''', conn)
         
+        if not df_clients.empty:
+            today = datetime.now().date()
+            days_left_list = []
+            status_list = []
+            
+            for idx, row in df_clients.iterrows():
+                created_str = row['created_at']
+                pkg_days = int(row['duration_days']) if pd.notnull(row['duration_days']) else 30
+                
+                if pd.notnull(created_str) and created_str != "":
+                    try:
+                        start_date = datetime.strptime(created_str, "%Y-%m-%d").date()
+                        end_date = start_date + timedelta(days=pkg_days)
+                        remaining = (end_date - today).days
+                        if remaining > 0:
+                            days_left_list.append(f"{remaining} يوم")
+                            status_list.append("نشط 🟢")
+                        else:
+                            days_left_list.append("0 يوم")
+                            status_list.append("منتهي 🔴")
+                    except Exception:
+                        days_left_list.append("غير محدد")
+                        status_list.append("نشط 🟢")
+                else:
+                    days_left_list.append("غير محدد")
+                    status_list.append("نشط 🟢")
+            
+            df_clients['المتبقي من الباقة'] = days_left_list
+            df_clients['حالة الاشتراك'] = status_list
+
         st.subheader(f"📋 {t['clients_list']}")
         st.dataframe(df_clients, use_container_width=True)
         
+        # --- قسم حذف العميل (خاص بالمالك Owner فقط) ---
+        if role == "Owner" and not df_clients.empty:
+            st.divider()
+            st.subheader(f"🗑️ {t['delete_client']}")
+            client_options = {f"{row['id']} - {row['client_name']}": row['id'] for _, row in df_clients.iterrows()}
+            selected_client_del = st.selectbox("اختر العميل المراد حذفه نهائياً:", list(client_options.keys()))
+            
+            if st.button("حذف العميل المحدد ❌", type="primary"):
+                client_id_to_del = client_options[selected_client_del]
+                c.execute("DELETE FROM clients WHERE id = ?", (client_id_to_del,))
+                conn.commit()
+                st.success(t["client_deleted"])
+                st.rerun()
+
         # Services Tracking Checklist Section
         st.divider()
         st.subheader(f"☑️ {t['track_services']}")
@@ -538,15 +604,16 @@ else:
                 with st.form("add_package_form"):
                     p_name = st.text_input(t["pkg_name"])
                     p_price = st.number_input(t["price"], min_value=0.0)
+                    p_duration = st.number_input(t["pkg_duration"], min_value=1, value=30, step=1)
                     p_details = st.text_area(t["details"])
                     if st.form_submit_button(t["save"]):
-                        c.execute("INSERT INTO packages (name, price, details) VALUES (?, ?, ?)", 
-                                  (p_name, p_price, p_details))
+                        c.execute("INSERT INTO packages (name, price, details, duration_days) VALUES (?, ?, ?, ?)", 
+                                  (p_name, p_price, p_details, int(p_duration)))
                         conn.commit()
                         st.success("Package added successfully!")
                         st.rerun()
         
-        df_pkgs = pd.read_sql_query("SELECT id, name, price, details FROM packages", conn)
+        df_pkgs = pd.read_sql_query("SELECT id, name, price, duration_days, details FROM packages", conn)
         st.dataframe(df_pkgs, use_container_width=True)
         
         if role == "Owner" and not df_pkgs.empty:
