@@ -8,16 +8,23 @@ import base64
 from PIL import Image
 
 # ==========================================
-# 1. إعدادات الصفحة والأيقونة
+# 1. إعدادات الصفحة والاسم والأيقونة
 # ==========================================
-logo_file = None
+# البحث عن صورة اللوجو المرفوعة
+logo_path = None
 for name in ["logo.jpg", "logo.jpg.jpeg", "logo.png", "logo.jpeg"]:
     if os.path.exists(name):
-        logo_file = name
+        logo_path = name
         break
 
-logo_img = Image.open(logo_file) if logo_file else None
+logo_img = None
+if logo_path:
+    try:
+        logo_img = Image.open(logo_path)
+    except Exception:
+        logo_img = None
 
+# إعداد اسم التطبيق واللوجو (يجب أن يكون في بداية الملف)
 if logo_img:
     st.set_page_config(
         page_title="Focal Craft Team",
@@ -37,17 +44,18 @@ def get_image_base64(image_path):
             return base64.b64encode(img_file.read()).decode()
     return ""
 
-logo_base64 = get_image_base64(logo_file)
+logo_base64 = get_image_base64(logo_path)
 
 # ==========================================
-# 2. قواعد البيانات (SQLite) مع إصلاح الخطأ
+# 2. قواعد البيانات (SQLite) المعالجة
 # ==========================================
 DB_FILE = "focal_craft.db"
 
 def hash_pass(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def init_db():
+def get_db_connection():
+    """إنشاء الاتصال وتأكيد وجود الجداول دائماً لتفادي خطأ OperationalError"""
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute('''
@@ -67,19 +75,17 @@ def init_db():
             details TEXT
         )
     ''')
+    # إنشاء الحساب الافتراضي إذا لم يكن موجوداً
     c.execute("SELECT * FROM users WHERE username = 'admin'")
     if not c.fetchone():
         hashed_pw = hash_pass("admin123")
         c.execute("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
                   ('admin', hashed_pw, 'Owner', 'Eng Abdelrhman Osama'))
     conn.commit()
-    conn.close()
-
-init_db()
+    return conn
 
 def check_login(username, password):
-    init_db()
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT username, role, name FROM users WHERE username = ? AND password = ?", 
               (username, hash_pass(password)))
@@ -88,16 +94,15 @@ def check_login(username, password):
     return user
 
 # ==========================================
-# 3. إدارة الجلسة واللغة (Session State)
+# 3. إدارة الجلسة واللغات (Session State)
 # ==========================================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
 if "lang" not in st.session_state:
-    st.session_state.lang = "EN"  # الافتراضي إنجليزي
+    st.session_state.lang = "EN"
 
-# قاموس اللغات (Dictionary for Translations)
 translations = {
     "EN": {
         "title": "Focal Craft Team",
@@ -184,7 +189,6 @@ if not st.session_state.logged_in:
         st.markdown(f"<h2 style='text-align: center; color: #f8fafc;'>{t['title']}</h2>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align: center; color: #94a3b8;'>{t['subtitle']}</p>", unsafe_allow_html=True)
         
-        # اختيار اللغة في الشاشة الرئيسية
         selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], horizontal=True)
         st.session_state.lang = "EN" if selected_lang == "English" else "AR"
         t = translations[st.session_state.lang]
@@ -215,7 +219,6 @@ else:
         st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
         st.caption(f"{t['role']}: {st.session_state.user_info['role']}")
         
-        # تحويل اللغة داخل الحساب
         lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
                                index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
         st.session_state.lang = "EN" if lang_choice == "English" else "AR"
@@ -237,7 +240,7 @@ else:
             st.rerun()
 
     # --- 1. الصفحة الرئيسية ---
-    if choice in [t["home"]]:
+    if choice == t["home"]:
         st.title(f"🎬 {t['home']}")
         st.write(f"{t['welcome']} {st.session_state.user_info['name']}")
         
@@ -247,13 +250,13 @@ else:
         col3.metric(t["role"], st.session_state.user_info["role"])
 
     # --- 2. خدمة العملاء ---
-    elif choice in [t["cs"]]:
+    elif choice == t["cs"]:
         st.title(f"📞 {t['cs']}")
 
     # --- 3. إدارة الباقات ---
-    elif choice in [t["packages"]]:
+    elif choice == t["packages"]:
         st.title(f"📦 {t['packages']}")
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         
         if st.session_state.user_info["role"] == "Owner":
             with st.expander(f"➕ {t['add_pkg']}"):
@@ -274,9 +277,9 @@ else:
         st.dataframe(df_pkgs, use_container_width=True)
 
     # --- 4. إدارة الموظفين ---
-    elif choice in [t["employees"]] and role == "Owner":
+    elif choice == t["employees"] and role == "Owner":
         st.title(f"👥 {t['employees']}")
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         
         with st.expander(f"➕ {t['add_emp']}"):
             with st.form("add_user_form"):
@@ -300,5 +303,5 @@ else:
         st.dataframe(df_users, use_container_width=True)
 
     # --- 5. الحسابات والتدقيق ---
-    elif choice in [t["audit"]] and role == "Owner":
+    elif choice == t["audit"] and role == "Owner":
         st.title(f"📊 {t['audit']}")
