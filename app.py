@@ -7,13 +7,13 @@ import os
 import base64
 from PIL import Image
 
-# 1. تحميل صورة اللوجو (تأكد من اسم الملف المرفوع logo.jpg أو logo.jpg.jpeg)
+# 1. تحميل صورة اللوجو
 try:
     logo = Image.open("logo.jpg")
 except:
     logo = Image.open("logo.jpg.jpeg")
 
-# 2. إعدادات الصفحة (تُكتب مرة واحدة فقط في الكود)
+# 2. إعدادات الصفحة
 st.set_page_config(
     page_title="فوكال كرافت تيم - Focal Craft Team",
     page_icon=logo,
@@ -21,6 +21,21 @@ st.set_page_config(
 )
 
 # 3. عرض اللوجو والعنوان
+st.image(logo, width=150)
+st.title("Focal Craft Team")
+
+
+def get_image_base64(image_path):
+    if image_path and os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return ""
+
+
+
+logo_file = "logo.jpg" if os.path.exists("logo.jpg") else "logo.jpg.jpeg"
+logo_base64 = get_image_base64(logo_file)
+
 st.image(logo, width=150)
 st.title("Focal Craft Team")
     if image_path and os.path.exists(image_path):
