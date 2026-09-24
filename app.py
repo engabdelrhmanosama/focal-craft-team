@@ -5,6 +5,7 @@ import hashlib
 import os
 import base64
 from PIL import Image
+from io import BytesIO
 
 # ==========================================
 # 1. إعدادات الصفحة والاسم والأيقونة
@@ -44,7 +45,7 @@ def get_image_base64(image_path):
 logo_base64 = get_image_base64(logo_path)
 
 # ==========================================
-# 2. قواعد البيانات (SQLite) - مسار /tmp المضمون
+# 2. قواعد البيانات (SQLite)
 # ==========================================
 DB_FILE = "/tmp/focal_craft.db"
 
@@ -82,6 +83,17 @@ def get_db_connection():
             package_id INTEGER,
             notes TEXT,
             FOREIGN KEY (package_id) REFERENCES packages (id)
+        )
+    ''')
+    # جدول المصروفات
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS expenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            amount REAL NOT NULL,
+            category TEXT,
+            added_by TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
     
@@ -126,10 +138,11 @@ translations = {
         "role": "Role",
         "nav": "Navigation",
         "home": "Home Page",
-        "cs": "Clients & Customer Service",
+        "cs": "Clients Management",
+        "expenses": "Log Expense",
         "packages": "Packages Management",
         "employees": "Users Management",
-        "audit": "Accounts & Audit",
+        "audit": "Expenses & Audit (Owner Only)",
         "logout": "Logout",
         "status": "System Status",
         "active": "Active 🟢",
@@ -144,11 +157,10 @@ translations = {
         "user_exists": "Username already exists!",
         "delete": "Delete",
         "edit": "Edit Username / Role",
-        "clients": "Clients Management",
         "add_client": "Add New Client",
         "client_name": "Client Name",
         "phone": "Phone Number",
-        "select_package": "Select Subscription Package",
+        "select_package": "Select Package",
         "notes": "Notes",
         "client_added": "Client added successfully!"
     },
@@ -164,10 +176,11 @@ translations = {
         "role": "الصلاحية",
         "nav": "التنقل",
         "home": "الصفحة الرئيسية",
-        "cs": "العملاء وخدمة العملاء",
+        "cs": "إدارة العملاء",
+        "expenses": "تسجيل مصروف",
         "packages": "إدارة الباقات",
         "employees": "إدارة المستخدمين",
-        "audit": "الحسابات والتدقيق",
+        "audit": "شيت المصروفات والتدقيق (المالك فقط)",
         "logout": "تسجيل الخروج",
         "status": "حالة النظام",
         "active": "نشط 🟢",
@@ -182,11 +195,10 @@ translations = {
         "user_exists": "اسم المستخدم موجود بالفعل!",
         "delete": "حذف",
         "edit": "تعديل اليوزر نيم / الرتبة",
-        "clients": "إدارة العملاء",
         "add_client": "إضافة عميل جديد",
         "client_name": "اسم العميل",
         "phone": "رقم الهاتف",
-        "select_package": "اختر الباقة المشترك فيها",
+        "select_package": "اختر الباقة",
         "notes": "ملاحظات",
         "client_added": "تمت إضافة العميل بنجاح!"
     }
@@ -255,7 +267,7 @@ else:
         st.divider()
         
         role = st.session_state.user_info["role"]
-        menu_options = [t["home"], t["cs"], t["packages"]]
+        menu_options = [t["home"], t["cs"], t["expenses"], t["packages"]]
         if role == "Owner":
             menu_options.extend([t["employees"], t["audit"]])
             
@@ -277,23 +289,21 @@ else:
         col2.metric(t["username"], st.session_state.user_info["username"])
         col3.metric(t["role"], st.session_state.user_info["role"])
 
-    # --- 2. إدارة العملاء وخدمة العملاء ---
+    # --- 2. إدارة العملاء (متاحة للجميع) ---
     elif choice == t["cs"]:
         st.title(f"📞 {t['cs']}")
         conn = get_db_connection()
         c = conn.cursor()
         
-        # إضافة عميل جديد
         with st.expander(f"➕ {t['add_client']}"):
             with st.form("add_client_form"):
                 c_name = st.text_input(t["client_name"])
                 c_phone = st.text_input(t["phone"])
                 
-                # جلب الباقات المتاحة لاختيار واحدة منها
                 pkgs = pd.read_sql_query("SELECT id, name FROM packages", conn)
                 pkg_options = {row['name']: row['id'] for _, row in pkgs.iterrows()} if not pkgs.empty else {}
                 
-                selected_pkg_name = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["لا توجد باقات مضافة"])
+                selected_pkg_name = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["لا توجد باقات متاحة"])
                 c_notes = st.text_area(t["notes"])
                 
                 if st.form_submit_button(t["save"]):
@@ -305,9 +315,8 @@ else:
                         st.success(t["client_added"])
                         st.rerun()
                     elif not pkg_options:
-                        st.error("يرجى إضافة باقة أولاً من قسم إدارة الباقات!")
+                        st.error("يرجى التواصل مع المالك لإضافة باقات أولاً!")
 
-        # عرض جدول العملاء مع باقاتهم
         df_clients = pd.read_sql_query('''
             SELECT c.id, c.client_name, c.phone, p.name as package_name, p.price, c.notes 
             FROM clients c 
@@ -316,13 +325,34 @@ else:
         conn.close()
         st.dataframe(df_clients, use_container_width=True)
 
-    # --- 3. إدارة الباقات ---
+    # --- 3. تسجيل مصروف جديد (متاح لجميع الموظفين والمالك) ---
+    elif choice == t["expenses"]:
+        st.title(f"💸 {t['expenses']}")
+        conn = get_db_connection()
+        c = conn.cursor()
+        
+        with st.form("add_expense_form"):
+            e_title = st.text_input("بيان المصروف (السبب/الوصف)")
+            e_amount = st.number_input("المبلغ", min_value=0.0)
+            e_cat = st.selectbox("القسم", ["تشغيلي", "معدات", "تسويق", "رواتب", "أخرى"])
+            
+            if st.form_submit_button("تسجيل المصروف"):
+                if e_title and e_amount > 0:
+                    c.execute("INSERT INTO expenses (title, amount, category, added_by) VALUES (?, ?, ?, ?)",
+                              (e_title, e_amount, e_cat, st.session_state.user_info["name"]))
+                    conn.commit()
+                    st.success("تم تسجيل المصروف بنجاح!")
+                else:
+                    st.error("يرجى إدخال المبلغ والبيان بشكل صحيح.")
+        conn.close()
+
+    # --- 4. إدارة الباقات (إضافة وحذف لـ Owner فقط / عرض للموظفين) ---
     elif choice == t["packages"]:
         st.title(f"📦 {t['packages']}")
         conn = get_db_connection()
         c = conn.cursor()
         
-        if st.session_state.user_info["role"] == "Owner":
+        if role == "Owner":
             with st.expander(f"➕ {t['add_pkg']}"):
                 with st.form("add_package_form"):
                     p_name = st.text_input(t["pkg_name"])
@@ -332,13 +362,12 @@ else:
                         c.execute("INSERT INTO packages (name, price, details) VALUES (?, ?, ?)", 
                                   (p_name, p_price, p_details))
                         conn.commit()
-                        st.success(t["save"])
+                        st.success("تمت إضافة الباقة بنجاح!")
                         st.rerun()
         
         df_pkgs = pd.read_sql_query("SELECT id, name, price, details FROM packages", conn)
         st.dataframe(df_pkgs, use_container_width=True)
         
-        # إمكانية حذف باقة لـ Owner
         if role == "Owner" and not df_pkgs.empty:
             st.divider()
             st.subheader("🗑️ حذف باقة")
@@ -346,17 +375,16 @@ else:
             if st.button("حذف الباقة المختارة"):
                 c.execute("DELETE FROM packages WHERE name = ?", (pkg_to_delete,))
                 conn.commit()
-                st.success("تم حذف الباقة!")
+                st.success("تم حذف الباقة بنجاح!")
                 st.rerun()
         conn.close()
 
-    # --- 4. إدارة المستخدمين (حذف وتعديل اسم المستخدم) ---
+    # --- 5. إدارة المستخدمين (لـ Owner فقط) ---
     elif choice == t["employees"] and role == "Owner":
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
         c = conn.cursor()
         
-        # إضافة مستخدم جديد
         with st.expander(f"➕ {t['add_emp']}"):
             with st.form("add_user_form"):
                 u_name = st.text_input(t["fullname"])
@@ -373,19 +401,17 @@ else:
                     except sqlite3.IntegrityError:
                         st.error(t["user_exists"])
         
-        # عرض المستخدمين
         df_users = pd.read_sql_query("SELECT id, name, username, role FROM users", conn)
         st.dataframe(df_users, use_container_width=True)
         
         st.divider()
         col_edit, col_del = st.columns(2)
         
-        # تعديل اسم المستخدم (Username) والرتبة
         with col_edit:
             st.subheader("✏️ " + t["edit"])
             user_list = df_users["username"].tolist()
             selected_user = st.selectbox("اختر المستخدم للتعديل", user_list)
-            new_username = st.text_input("اسم المستخدم الجديد (Username)", value=selected_user)
+            new_username = st.text_input("اسم المستخدم الجديد", value=selected_user)
             new_role = st.selectbox("الرتبة الجديدة", ["Customer Service", "Editor", "Moderator", "Owner"])
             
             if st.button("حفظ التعديلات"):
@@ -398,7 +424,6 @@ else:
                 except sqlite3.IntegrityError:
                     st.error("اسم المستخدم الجديد مستخدم بالفعل!")
 
-        # حذف مستخدم
         with col_del:
             st.subheader("🗑️ " + t["delete"])
             user_to_del = st.selectbox("اختر المستخدم للحذف", [u for u in user_list if u != "admin"])
@@ -410,6 +435,43 @@ else:
                 
         conn.close()
 
-    # --- 5. الحسابات والتدقيق ---
+    # --- 6. شيت المصروفات والتدقيق (خاص بـ Owner فقط - مع تحميل إكسيل) ---
     elif choice == t["audit"] and role == "Owner":
         st.title(f"📊 {t['audit']}")
+        conn = get_db_connection()
+        c = conn.cursor()
+        
+        df_exp = pd.read_sql_query("SELECT id, title, amount, category, added_by, date FROM expenses", conn)
+        
+        col1, col2 = st.columns([3, 1])
+        col1.metric("إجمالي المصروفات", f"{df_exp['amount'].sum() if not df_exp.empty else 0:,.2f} EGP")
+        
+        # تصدير إلى Excel
+        if not df_exp.empty:
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df_exp.to_excel(writer, index=False, sheet_name='المصروفات')
+            excel_data = output.getvalue()
+            
+            col2.download_button(
+                label="📥 سحب شيت المصروفات (Excel)",
+                data=excel_data,
+                file_name="expenses_report.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+            
+        st.dataframe(df_exp, use_container_width=True)
+        
+        # حذف مصروف معين
+        if not df_exp.empty:
+            st.divider()
+            st.subheader("🗑️ مسح مصروف محدد")
+            exp_to_delete = st.selectbox("اختر رقم المصروف لمسحه", df_exp["id"].tolist())
+            if st.button("حذف المصروف المحدد"):
+                c.execute("DELETE FROM expenses WHERE id = ?", (exp_to_delete,))
+                conn.commit()
+                st.success("تم مسح المصروف بنجاح!")
+                st.rerun()
+                
+        conn.close()
