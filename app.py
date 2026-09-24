@@ -1,34 +1,30 @@
 import streamlit as st
-from PIL import Image
-
-# تحميل صورة اللوجو
-logo = Image.open("logo.jpg")
-
-# ضبط إعدادات الصفحة (اسم التطبيق والأيقونة)
-st.set_page_config(
-    page_title="فوكال كرافت تيم",  # الاسم الذي يظهر في تبويب المتصفح ومن الخارج
-    page_icon=logo,              # أيقونة اللوجو (Favicon)
-    layout="wide"
-)
-
-# عرض اللوجو والعنوان داخل الصفحة
-st.image(logo, width=150)
-st.title("Focal Craft Team")
-
-import streamlit as st
 import pandas as pd
 import sqlite3
 import hashlib
 from datetime import datetime
 import os
 import base64
+from PIL import Image
 
-# --- 1. SETTINGS & PAGE CONFIG ---
+# 1. تحميل صورة اللوجو (تأكد من اسم الملف المرفوع logo.jpg أو logo.jpg.jpeg)
+try:
+    logo = Image.open("logo.jpg")
+except:
+    logo = Image.open("logo.jpg.jpeg")
+
+# 2. إعدادات الصفحة (تُكتب مرة واحدة فقط في الكود)
 st.set_page_config(
-    page_title="Focal Craft Team",
-    page_icon="🎨",
+    page_title="فوكال كرافت تيم - Focal Craft Team",
+    page_icon=logo,
     layout="wide"
 )
+
+# 3. عرض اللوجو والعنوان
+st.image(logo, width=150)
+st.title("Focal Craft Team")
+
+
 
 # Helper function for image base64
 def get_image_base64(image_path):
