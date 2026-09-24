@@ -1,4 +1,21 @@
 import streamlit as st
+from PIL import Image
+
+# تحميل صورة اللوجو
+logo = Image.open("logo.jpg")
+
+# ضبط إعدادات الصفحة (اسم التطبيق والأيقونة)
+st.set_page_config(
+    page_title="فوكال كرافت تيم",  # الاسم الذي يظهر في تبويب المتصفح ومن الخارج
+    page_icon=logo,              # أيقونة اللوجو (Favicon)
+    layout="wide"
+)
+
+# عرض اللوجو والعنوان داخل الصفحة
+st.image(logo, width=150)
+st.title("Focal Craft Team")
+
+import streamlit as st
 import pandas as pd
 import sqlite3
 import hashlib
