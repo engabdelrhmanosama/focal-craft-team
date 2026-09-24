@@ -1,13 +1,3 @@
-# إخفاء الهيدر العلوي لـ Streamlit وشعار GitHub ورابط Fork
-hide_github_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stAppHeader {display: none;}
-    </style>
-"""
-st.markdown(hide_github_style, unsafe_allow_html=True)
 import streamlit as st
 import pandas as pd
 import sqlite3
