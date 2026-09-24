@@ -56,6 +56,7 @@ def hash_pass(password):
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     c = conn.cursor()
+    
     # Users Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -66,6 +67,7 @@ def get_db_connection():
             name TEXT NOT NULL
         )
     ''')
+    
     # Packages Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS packages (
@@ -75,6 +77,7 @@ def get_db_connection():
             details TEXT
         )
     ''')
+    
     # Clients Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS clients (
@@ -87,6 +90,16 @@ def get_db_connection():
             FOREIGN KEY (package_id) REFERENCES packages (id)
         )
     ''')
+    
+    # Auto-Migration: إضافة العمود إذا كان الجدول قديماً
+    c.execute("PRAGMA table_info(clients)")
+    columns = [column[1] for column in c.fetchall()]
+    if 'tasks_status' not in columns:
+        try:
+            c.execute("ALTER TABLE clients ADD COLUMN tasks_status TEXT DEFAULT '{}'")
+        except Exception:
+            pass
+
     # Expenses Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS expenses (
