@@ -116,7 +116,7 @@ def check_login(username, password):
     return user
 
 # ==========================================
-# 3. إدارة الجلسة واللغات (Session State)
+# 3. إدارة الجلسة واللغات والأنماط (Dark/Light)
 # ==========================================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -124,6 +124,22 @@ if "user_info" not in st.session_state:
     st.session_state.user_info = None
 if "lang" not in st.session_state:
     st.session_state.lang = "EN"
+if "theme" not in st.session_state:
+    st.session_state.theme = "Dark"
+
+# تطبيق الوضع الصباحي أو الليلي
+if st.session_state.theme == "Light":
+    st.markdown("""
+        <style>
+        .stApp {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        .stSidebar {
+            background-color: #e2e8f0 !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
 translations = {
     "EN": {
@@ -156,7 +172,7 @@ translations = {
         "emp_added": "User added successfully!",
         "user_exists": "Username already exists!",
         "delete": "Delete",
-        "edit": "Edit Username / Role",
+        "edit": "Edit User Details & Password",
         "add_client": "Add New Client",
         "client_name": "Client Name",
         "phone": "Phone Number",
@@ -192,9 +208,9 @@ translations = {
         "add_emp": "إضافة مستخدم جديد",
         "fullname": "الاسم الكامل",
         "emp_added": "تمت إضافة المستخدم بنجاح!",
-        "user_exists": "اسم المستخدم موجود بالفعل!",
+        "user_exists": "اسم المستخدم أو ID موجود بالفعل!",
         "delete": "حذف",
-        "edit": "تعديل اليوزر نيم / الرتبة",
+        "edit": "تعديل البيانات، الـ ID وكلمة المرور",
         "add_client": "إضافة عميل جديد",
         "client_name": "اسم العميل",
         "phone": "رقم الهاتف",
@@ -210,28 +226,34 @@ t = translations[st.session_state.lang]
 # 4. واجهة تسجيل الدخول (Login Screen)
 # ==========================================
 if not st.session_state.logged_in:
-    bg_style = f"""
-    <style>
-    .stApp {{
-        background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
-                    url('data:image/jpeg;base64,{logo_base64}');
-        background-size: cover;
-        background-position: center;
-    }}
-    </style>
-    """
-    st.markdown(bg_style, unsafe_allow_html=True)
+    if st.session_state.theme == "Dark":
+        bg_style = f"""
+        <style>
+        .stApp {{
+            background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
+                        url('data:image/jpeg;base64,{logo_base64}');
+            background-size: cover;
+            background-position: center;
+        }}
+        </style>
+        """
+        st.markdown(bg_style, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if logo_img:
             st.image(logo_img, width=150)
-        st.markdown(f"<h2 style='text-align: center; color: #f8fafc;'>{t['title']}</h2>", unsafe_allow_html=True)
-        st.markdown(f"<p style='text-align: center; color: #94a3b8;'>{t['subtitle']}</p>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='text-align: center;'>{t['title']}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<p style='text-align: center;'>{t['subtitle']}</p>", unsafe_allow_html=True)
         
-        selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], horizontal=True)
-        st.session_state.lang = "EN" if selected_lang == "English" else "AR"
-        t = translations[st.session_state.lang]
+        col_lang, col_theme = st.columns(2)
+        with col_lang:
+            selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], horizontal=True)
+            st.session_state.lang = "EN" if selected_lang == "English" else "AR"
+            t = translations[st.session_state.lang]
+        with col_theme:
+            theme_choice = st.radio("☀️ Theme / المظهر", ["Dark", "Light"], horizontal=True)
+            st.session_state.theme = theme_choice
 
         with st.form("login_form"):
             username = st.text_input(t["username"])
@@ -259,10 +281,15 @@ else:
         st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
         st.caption(f"{t['role']}: {st.session_state.user_info['role']}")
         
-        lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
+        # التحكم باللغة والمظهر
+        lang_choice = st.radio("🌐 اللغة", ["English", "العربية"], 
                                index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
         st.session_state.lang = "EN" if lang_choice == "English" else "AR"
         t = translations[st.session_state.lang]
+        
+        theme_toggle = st.radio("☀️ المظهر", ["Dark 🌙", "Light ☀️"], 
+                                index=0 if st.session_state.theme == "Dark" else 1, horizontal=True)
+        st.session_state.theme = "Dark" if "Dark" in theme_toggle else "Light"
         
         st.divider()
         
@@ -289,7 +316,7 @@ else:
         col2.metric(t["username"], st.session_state.user_info["username"])
         col3.metric(t["role"], st.session_state.user_info["role"])
 
-    # --- 2. إدارة العملاء (متاحة للجميع) ---
+    # --- 2. إدارة العملاء ---
     elif choice == t["cs"]:
         st.title(f"📞 {t['cs']}")
         conn = get_db_connection()
@@ -325,7 +352,7 @@ else:
         conn.close()
         st.dataframe(df_clients, use_container_width=True)
 
-    # --- 3. تسجيل مصروف جديد (متاح لجميع الموظفين والمالك) ---
+    # --- 3. تسجيل مصروف جديد ---
     elif choice == t["expenses"]:
         st.title(f"💸 {t['expenses']}")
         conn = get_db_connection()
@@ -346,7 +373,7 @@ else:
                     st.error("يرجى إدخال المبلغ والبيان بشكل صحيح.")
         conn.close()
 
-    # --- 4. إدارة الباقات (إضافة وحذف لـ Owner فقط / عرض للموظفين) ---
+    # --- 4. إدارة الباقات ---
     elif choice == t["packages"]:
         st.title(f"📦 {t['packages']}")
         conn = get_db_connection()
@@ -379,12 +406,13 @@ else:
                 st.rerun()
         conn.close()
 
-    # --- 5. إدارة المستخدمين (لـ Owner فقط) ---
+    # --- 5. إدارة المستخدمين (تعديل الـ ID، الباسورد، اسم المستخدم) ---
     elif choice == t["employees"] and role == "Owner":
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
         c = conn.cursor()
         
+        # إضافة مستخدم جديد
         with st.expander(f"➕ {t['add_emp']}"):
             with st.form("add_user_form"):
                 u_name = st.text_input(t["fullname"])
@@ -407,23 +435,37 @@ else:
         st.divider()
         col_edit, col_del = st.columns(2)
         
+        # تعديل الـ ID، اسم المستخدم، والرقم السري
         with col_edit:
             st.subheader("✏️ " + t["edit"])
             user_list = df_users["username"].tolist()
             selected_user = st.selectbox("اختر المستخدم للتعديل", user_list)
-            new_username = st.text_input("اسم المستخدم الجديد", value=selected_user)
-            new_role = st.selectbox("الرتبة الجديدة", ["Customer Service", "Editor", "Moderator", "Owner"])
             
-            if st.button("حفظ التعديلات"):
+            # جلب البيانات الحالية للمستخدم
+            c.execute("SELECT id, username, role FROM users WHERE username = ?", (selected_user,))
+            current_user_data = c.fetchone()
+            
+            new_id = st.number_input("تعديل رقم الـ ID", value=int(current_user_data[0]), step=1)
+            new_username = st.text_input("اسم المستخدم الجديد (Username)", value=current_user_data[1])
+            new_role = st.selectbox("الرتبة الجديدة", ["Customer Service", "Editor", "Moderator", "Owner"], 
+                                    index=["Customer Service", "Editor", "Moderator", "Owner"].index(current_user_data[2]))
+            new_password = st.text_input("كلمة المرور الجديدة (اتركها فارغة إذا لا تريد التغيير)", type="password")
+            
+            if st.button("حفظ جميع التعديلات"):
                 try:
-                    c.execute("UPDATE users SET username = ?, role = ? WHERE username = ?", 
-                              (new_username, new_role, selected_user))
+                    if new_password.strip() != "":
+                        c.execute("UPDATE users SET id = ?, username = ?, role = ?, password = ? WHERE username = ?", 
+                                  (new_id, new_username, new_role, hash_pass(new_password), selected_user))
+                    else:
+                        c.execute("UPDATE users SET id = ?, username = ?, role = ? WHERE username = ?", 
+                                  (new_id, new_username, new_role, selected_user))
                     conn.commit()
-                    st.success("تم تعديل البيانات بنجاح!")
+                    st.success("تم تحديث بيانات المستخدم والرقم السري بنجاح!")
                     st.rerun()
                 except sqlite3.IntegrityError:
-                    st.error("اسم المستخدم الجديد مستخدم بالفعل!")
+                    st.error("رقم الـ ID أو اسم المستخدم الجديد مستخدم بالفعل!")
 
+        # حذف مستخدم
         with col_del:
             st.subheader("🗑️ " + t["delete"])
             user_to_del = st.selectbox("اختر المستخدم للحذف", [u for u in user_list if u != "admin"])
@@ -435,7 +477,7 @@ else:
                 
         conn.close()
 
-    # --- 6. شيت المصروفات والتدقيق (خاص بـ Owner فقط - مع تحميل إكسيل) ---
+    # --- 6. شيت المصروفات والتدقيق (خاص بـ Owner فقط) ---
     elif choice == t["audit"] and role == "Owner":
         st.title(f"📊 {t['audit']}")
         conn = get_db_connection()
@@ -446,7 +488,6 @@ else:
         col1, col2 = st.columns([3, 1])
         col1.metric("إجمالي المصروفات", f"{df_exp['amount'].sum() if not df_exp.empty else 0:,.2f} EGP")
         
-        # تصدير إلى Excel
         if not df_exp.empty:
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -463,7 +504,6 @@ else:
             
         st.dataframe(df_exp, use_container_width=True)
         
-        # حذف مصروف معين
         if not df_exp.empty:
             st.divider()
             st.subheader("🗑️ مسح مصروف محدد")
