@@ -23,11 +23,6 @@ st.set_page_config(
 # 3. عرض اللوجو والعنوان
 st.image(logo, width=150)
 st.title("Focal Craft Team")
-
-
-
-# Helper function for image base64
-def get_image_base64(image_path):
     if image_path and os.path.exists(image_path):
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
