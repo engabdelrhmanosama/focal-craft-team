@@ -128,12 +128,16 @@ def get_db_connection():
         )
     ''')
     
-    # Default Admin User
-    c.execute("SELECT * FROM users WHERE username = 'admin'")
-    if not c.fetchone():
-        hashed_pw = hash_pass("admin123")
+    # Default Owner User Configuration
+    owner_username = "Eng Abdelrhman Osama"
+    default_password = hash_pass("#Bedo-1428")
+    
+    c.execute("SELECT * FROM users WHERE role = 'Owner'")
+    owner_user = c.fetchone()
+    
+    if not owner_user:
         c.execute("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
-                  ('admin', hashed_pw, 'Owner', 'Eng Abdelrhman Osama'))
+                  (owner_username, default_password, 'Owner', owner_username))
     conn.commit()
     return conn
 
@@ -449,7 +453,7 @@ else:
                     elif not pkg_options:
                         st.error(t["no_packages_err"])
 
-        # Display Clients DataFrame مع احتساب مدة الباقة المحددة
+        # Display Clients DataFrame
         df_clients = pd.read_sql_query('''
             SELECT c.id, c.client_name, c.phone, p.name as package_name, p.price, COALESCE(p.duration_days, 30) as duration_days, c.created_at, c.notes 
             FROM clients c 
@@ -489,7 +493,7 @@ else:
         st.subheader(f"📋 {t['clients_list']}")
         st.dataframe(df_clients, use_container_width=True)
         
-        # --- قسم حذف العميل (خاص بالمالك Owner فقط) ---
+        # --- Delete Client (Owner Only) ---
         if role == "Owner" and not df_clients.empty:
             st.divider()
             st.subheader(f"🗑️ {t['delete_client']}")
@@ -662,11 +666,12 @@ else:
             user_list = df_users["username"].tolist()
             selected_user = st.selectbox(t["select_user_edit"], user_list)
             
-            c.execute("SELECT id, username, role FROM users WHERE username = ?", (selected_user,))
+            c.execute("SELECT id, username, role, name FROM users WHERE username = ?", (selected_user,))
             current_user_data = c.fetchone()
             
             new_id = st.number_input(t["edit_id"], value=int(current_user_data[0]), step=1)
             new_username = st.text_input(t["new_username"], value=current_user_data[1])
+            new_fullname = st.text_input(t["fullname"], value=current_user_data[3])
             new_role = st.selectbox(t["new_role"], ["Customer Service", "Editor", "Moderator", "Owner"], 
                                     index=["Customer Service", "Editor", "Moderator", "Owner"].index(current_user_data[2]))
             new_password = st.text_input(t["new_pw"], type="password")
@@ -674,11 +679,11 @@ else:
             if st.button(t["save_user_changes"]):
                 try:
                     if new_password.strip() != "":
-                        c.execute("UPDATE users SET id = ?, username = ?, role = ?, password = ? WHERE username = ?", 
-                                  (new_id, new_username, new_role, hash_pass(new_password), selected_user))
+                        c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, password = ? WHERE username = ?", 
+                                  (new_id, new_username, new_fullname, new_role, hash_pass(new_password), selected_user))
                     else:
-                        c.execute("UPDATE users SET id = ?, username = ?, role = ? WHERE username = ?", 
-                                  (new_id, new_username, new_role, selected_user))
+                        c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ? WHERE username = ?", 
+                                  (new_id, new_username, new_fullname, new_role, selected_user))
                     conn.commit()
                     st.success(t["user_updated"])
                     st.rerun()
@@ -688,7 +693,7 @@ else:
         # Delete User
         with col_del:
             st.subheader("🗑️ " + t["delete_user"])
-            user_to_del = st.selectbox("Select user to delete", [u for u in user_list if u != "admin"])
+            user_to_del = st.selectbox("Select user to delete", [u for u in user_list if u != st.session_state.user_info["username"]])
             if st.button("Delete User"):
                 c.execute("DELETE FROM users WHERE username = ?", (user_to_del,))
                 conn.commit()
