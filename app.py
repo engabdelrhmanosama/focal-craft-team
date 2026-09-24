@@ -20,7 +20,7 @@ def get_image_base64(image_path):
             return base64.b64encode(img_file.read()).decode()
     return ""
 
-logo_file = "logo.jpg.jpeg" if os.path.exists("logo.jpg.jpeg") else ("logo.jpg" if os.path.exists("logo.jpg") else ("logo.png" if os.path.exists("logo.png") else ""))
+logo_file = "logo.jpg" if os.path.exists("logo.jpg") else ("logo.jpg" if os.path.exists("logo.jpg") else ("logo.png" if os.path.exists("logo.png") else ""))
 logo_base64 = get_image_base64(logo_file)
 
 # --- 2. DATABASE SETUP ---
