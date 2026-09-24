@@ -4,11 +4,12 @@ import sqlite3
 import hashlib
 import os
 import base64
+import json
 from PIL import Image
 from io import BytesIO
 
 # ==========================================
-# 1. إعدادات الصفحة والاسم والأيقونة
+# 1. Page Config & Logo Setup
 # ==========================================
 logo_path = None
 for name in ["logo.jpg", "logo.jpg.jpeg", "logo.png", "logo.jpeg"]:
@@ -45,7 +46,7 @@ def get_image_base64(image_path):
 logo_base64 = get_image_base64(logo_path)
 
 # ==========================================
-# 2. قواعد البيانات (SQLite)
+# 2. Database Connection & Schema (SQLite)
 # ==========================================
 DB_FILE = "/tmp/focal_craft.db"
 
@@ -55,7 +56,7 @@ def hash_pass(password):
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     c = conn.cursor()
-    # جدول المستخدمين
+    # Users Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,7 +66,7 @@ def get_db_connection():
             name TEXT NOT NULL
         )
     ''')
-    # جدول الباقات
+    # Packages Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS packages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,7 +75,7 @@ def get_db_connection():
             details TEXT
         )
     ''')
-    # جدول العملاء
+    # Clients Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS clients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,10 +83,11 @@ def get_db_connection():
             phone TEXT,
             package_id INTEGER,
             notes TEXT,
+            tasks_status TEXT DEFAULT '{}',
             FOREIGN KEY (package_id) REFERENCES packages (id)
         )
     ''')
-    # جدول المصروفات
+    # Expenses Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS expenses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,7 +99,7 @@ def get_db_connection():
         )
     ''')
     
-    # حساب الأدمن الافتراضي
+    # Default Admin User
     c.execute("SELECT * FROM users WHERE username = 'admin'")
     if not c.fetchone():
         hashed_pw = hash_pass("admin123")
@@ -116,7 +118,7 @@ def check_login(username, password):
     return user
 
 # ==========================================
-# 3. إدارة الجلسة واللغات والأنماط (Dark/Light)
+# 3. Session State & Multi-Language Dictionary
 # ==========================================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -127,7 +129,7 @@ if "lang" not in st.session_state:
 if "theme" not in st.session_state:
     st.session_state.theme = "Dark"
 
-# تطبيق الوضع الصباحي أو الليلي
+# Theme Application (Dark / Light)
 if st.session_state.theme == "Light":
     st.markdown("""
         <style>
@@ -154,7 +156,7 @@ translations = {
         "role": "Role",
         "nav": "Navigation",
         "home": "Home Page",
-        "cs": "Clients Management",
+        "cs": "Clients & Services Tracking",
         "expenses": "Log Expense",
         "packages": "Packages Management",
         "employees": "Users Management",
@@ -165,20 +167,50 @@ translations = {
         "add_pkg": "Add New Package",
         "pkg_name": "Package Name",
         "price": "Price",
-        "details": "Details",
+        "details": "Package Services (Separate with commas or new lines)",
         "save": "Save",
         "add_emp": "Add New User",
         "fullname": "Full Name",
         "emp_added": "User added successfully!",
-        "user_exists": "Username already exists!",
+        "user_exists": "Username or ID already exists!",
         "delete": "Delete",
-        "edit": "Edit User Details & Password",
+        "edit": "Edit User Details, ID & Password",
         "add_client": "Add New Client",
         "client_name": "Client Name",
         "phone": "Phone Number",
         "select_package": "Select Package",
         "notes": "Notes",
-        "client_added": "Client added successfully!"
+        "client_added": "Client added successfully!",
+        "clients_list": "Subscribed Clients List",
+        "track_services": "Track Package Services & Tasks",
+        "select_client_track": "Select client to view or update services:",
+        "save_tasks": "Save Service Status 💾",
+        "tasks_saved": "Client service status updated successfully!",
+        "no_packages_err": "Please contact owner to add packages first!",
+        "exp_title": "Expense Title / Description",
+        "amount": "Amount",
+        "category": "Category",
+        "log_exp_btn": "Log Expense",
+        "exp_saved": "Expense logged successfully!",
+        "exp_err": "Please enter valid title and amount.",
+        "delete_pkg": "Delete Package",
+        "pkg_deleted": "Package deleted successfully!",
+        "select_user_edit": "Select user to edit",
+        "edit_id": "Edit User ID",
+        "new_username": "New Username",
+        "new_role": "New Role",
+        "new_pw": "New Password (Leave blank to keep unchanged)",
+        "save_user_changes": "Save User Changes",
+        "user_updated": "User details and password updated successfully!",
+        "delete_user": "Delete User",
+        "user_deleted": "User deleted successfully!",
+        "total_exp": "Total Expenses",
+        "export_excel": "📥 Export Expenses Sheet (Excel)",
+        "delete_exp": "Delete Expense",
+        "exp_deleted": "Expense deleted successfully!",
+        "no_clients": "No clients registered yet.",
+        "no_pkg_assigned": "Client is not assigned to any package.",
+        "completion_rate": "Service Completion Rate:"
     },
     "AR": {
         "title": "فوكال كرافت تيم",
@@ -192,7 +224,7 @@ translations = {
         "role": "الصلاحية",
         "nav": "التنقل",
         "home": "الصفحة الرئيسية",
-        "cs": "إدارة العملاء",
+        "cs": "إدارة العملاء ومتابعة الخدمات",
         "expenses": "تسجيل مصروف",
         "packages": "إدارة الباقات",
         "employees": "إدارة المستخدمين",
@@ -203,7 +235,7 @@ translations = {
         "add_pkg": "إضافة باقة جديدة",
         "pkg_name": "اسم الباقة",
         "price": "السعر",
-        "details": "التفاصيل",
+        "details": "تفاصيل الخدمات (افصل بين كل خدمة بفاصلة أو سطر جديد)",
         "save": "حفظ",
         "add_emp": "إضافة مستخدم جديد",
         "fullname": "الاسم الكامل",
@@ -216,14 +248,44 @@ translations = {
         "phone": "رقم الهاتف",
         "select_package": "اختر الباقة",
         "notes": "ملاحظات",
-        "client_added": "تمت إضافة العميل بنجاح!"
+        "client_added": "تمت إضافة العميل بنجاح!",
+        "clients_list": "قائمة العملاء المشتركين",
+        "track_services": "متابعة تنفيذ خدمات الباقة للعملاء",
+        "select_client_track": "اختر العميل لمتابعة أو تقديم الخدمات الخاصة به:",
+        "save_tasks": "حفظ تحديثات الخدمات 💾",
+        "tasks_saved": "تم حفظ حالة الخدمات للعميل بنجاح!",
+        "no_packages_err": "يرجى التواصل مع المالك لإضافة باقات أولاً!",
+        "exp_title": "بيان المصروف (السبب/الوصف)",
+        "amount": "المبلغ",
+        "category": "القسم",
+        "log_exp_btn": "تسجيل المصروف",
+        "exp_saved": "تم تسجيل المصروف بنجاح!",
+        "exp_err": "يرجى إدخال المبلغ والبيان بشكل صحيح.",
+        "delete_pkg": "حذف باقة",
+        "pkg_deleted": "تم حذف الباقة بنجاح!",
+        "select_user_edit": "اختر المستخدم للتعديل",
+        "edit_id": "تعديل رقم الـ ID",
+        "new_username": "اسم المستخدم الجديد",
+        "new_role": "الرتبة الجديدة",
+        "new_pw": "كلمة المرور الجديدة (اتركها فارغة إذا لا تريد التغيير)",
+        "save_user_changes": "حفظ جميع التعديلات",
+        "user_updated": "تم تحديث بيانات المستخدم والرقم السري بنجاح!",
+        "delete_user": "حذف مستخدم",
+        "user_deleted": "تم حذف المستخدم بنجاح!",
+        "total_exp": "إجمالي المصروفات",
+        "export_excel": "📥 سحب شيت المصروفات (Excel)",
+        "delete_exp": "مسح مصروف محدد",
+        "exp_deleted": "تم مسح المصروف بنجاح!",
+        "no_clients": "لا يوجد عملاء مسجلين حالياً.",
+        "no_pkg_assigned": "العميل غير مشترك في باقة حالياً.",
+        "completion_rate": "نسبة إنجاز الخدمات:"
     }
 }
 
 t = translations[st.session_state.lang]
 
 # ==========================================
-# 4. واجهة تسجيل الدخول (Login Screen)
+# 4. Login Interface
 # ==========================================
 if not st.session_state.logged_in:
     if st.session_state.theme == "Dark":
@@ -271,7 +333,7 @@ if not st.session_state.logged_in:
                     st.error(t["login_error"])
 
 # ==========================================
-# 5. الواجهة الرئيسية (Dashboard)
+# 5. Main Dashboard
 # ==========================================
 else:
     with st.sidebar:
@@ -281,13 +343,13 @@ else:
         st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
         st.caption(f"{t['role']}: {st.session_state.user_info['role']}")
         
-        # التحكم باللغة والمظهر
-        lang_choice = st.radio("🌐 اللغة", ["English", "العربية"], 
+        # Language & Theme Controls
+        lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
                                index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
         st.session_state.lang = "EN" if lang_choice == "English" else "AR"
         t = translations[st.session_state.lang]
         
-        theme_toggle = st.radio("☀️ المظهر", ["Dark 🌙", "Light ☀️"], 
+        theme_toggle = st.radio("☀️ Theme / المظهر", ["Dark 🌙", "Light ☀️"], 
                                 index=0 if st.session_state.theme == "Dark" else 1, horizontal=True)
         st.session_state.theme = "Dark" if "Dark" in theme_toggle else "Light"
         
@@ -306,7 +368,7 @@ else:
             st.session_state.user_info = None
             st.rerun()
 
-    # --- 1. الصفحة الرئيسية ---
+    # --- 1. Home Page ---
     if choice == t["home"]:
         st.title(f"🎬 {t['home']}")
         st.write(f"{t['welcome']} {st.session_state.user_info['name']}")
@@ -316,64 +378,143 @@ else:
         col2.metric(t["username"], st.session_state.user_info["username"])
         col3.metric(t["role"], st.session_state.user_info["role"])
 
-    # --- 2. إدارة العملاء ---
+    # --- 2. Clients & Services Checklist Tracking ---
     elif choice == t["cs"]:
         st.title(f"📞 {t['cs']}")
         conn = get_db_connection()
         c = conn.cursor()
         
+        # Add Client Form
         with st.expander(f"➕ {t['add_client']}"):
             with st.form("add_client_form"):
                 c_name = st.text_input(t["client_name"])
                 c_phone = st.text_input(t["phone"])
                 
-                pkgs = pd.read_sql_query("SELECT id, name FROM packages", conn)
-                pkg_options = {row['name']: row['id'] for _, row in pkgs.iterrows()} if not pkgs.empty else {}
+                pkgs = pd.read_sql_query("SELECT id, name, details FROM packages", conn)
+                pkg_options = {row['name']: (row['id'], row['details']) for _, row in pkgs.iterrows()} if not pkgs.empty else {}
                 
-                selected_pkg_name = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["لا توجد باقات متاحة"])
+                selected_pkg_name = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["N/A"])
                 c_notes = st.text_area(t["notes"])
                 
                 if st.form_submit_button(t["save"]):
                     if c_name and pkg_options:
-                        pkg_id = pkg_options[selected_pkg_name]
-                        c.execute("INSERT INTO clients (client_name, phone, package_id, notes) VALUES (?, ?, ?, ?)",
-                                  (c_name, c_phone, pkg_id, c_notes))
+                        pkg_id, pkg_details = pkg_options[selected_pkg_name]
+                        
+                        initial_tasks = {}
+                        if pkg_details:
+                            services = [s.strip() for s in pkg_details.replace("\n", ",").split(",") if s.strip()]
+                            for service in services:
+                                initial_tasks[service] = False
+                        
+                        c.execute("INSERT INTO clients (client_name, phone, package_id, notes, tasks_status) VALUES (?, ?, ?, ?, ?)",
+                                  (c_name, c_phone, pkg_id, c_notes, json.dumps(initial_tasks, ensure_ascii=False)))
                         conn.commit()
                         st.success(t["client_added"])
                         st.rerun()
                     elif not pkg_options:
-                        st.error("يرجى التواصل مع المالك لإضافة باقات أولاً!")
+                        st.error(t["no_packages_err"])
 
+        # Display Clients DataFrame
         df_clients = pd.read_sql_query('''
             SELECT c.id, c.client_name, c.phone, p.name as package_name, p.price, c.notes 
             FROM clients c 
             LEFT JOIN packages p ON c.package_id = p.id
         ''', conn)
-        conn.close()
+        
+        st.subheader(f"📋 {t['clients_list']}")
         st.dataframe(df_clients, use_container_width=True)
+        
+        # Services Tracking Checklist Section
+        st.divider()
+        st.subheader(f"☑️ {t['track_services']}")
+        
+        c.execute('''
+            SELECT c.id, c.client_name, p.name, c.tasks_status, p.details 
+            FROM clients c 
+            LEFT JOIN packages p ON c.package_id = p.id
+        ''')
+        clients_data = c.fetchall()
+        
+        if clients_data:
+            client_names = [f"{row[0]} - {row[1]} ({row[2]})" for row in clients_data]
+            selected_client_str = st.selectbox(t["select_client_track"], client_names)
+            
+            selected_id = int(selected_client_str.split(" - ")[0])
+            
+            c.execute("SELECT client_name, tasks_status, package_id FROM clients WHERE id = ?", (selected_id,))
+            cl_info = c.fetchone()
+            client_name, tasks_json, pkg_id = cl_info[0], cl_info[1], cl_info[2]
+            
+            c.execute("SELECT name, details FROM packages WHERE id = ?", (pkg_id,))
+            pkg_info = c.fetchone()
+            
+            if pkg_info:
+                st.markdown(f"#### Client: **{client_name}** | Package: **{pkg_info[0]}**")
+                
+                try:
+                    tasks_dict = json.loads(tasks_json) if tasks_json else {}
+                except:
+                    tasks_dict = {}
 
-    # --- 3. تسجيل مصروف جديد ---
+                raw_services = [s.strip() for s in pkg_info[1].replace("\n", ",").split(",") if s.strip()] if pkg_info[1] else []
+                for srv in raw_services:
+                    if srv not in tasks_dict:
+                        tasks_dict[srv] = False
+
+                if tasks_dict:
+                    updated_tasks = {}
+                    completed_count = 0
+                    
+                    st.write("📌 **Check services upon completion (Tick ✔️):**")
+                    
+                    for service_name, status in tasks_dict.items():
+                        is_done = st.checkbox(service_name, value=status, key=f"task_{selected_id}_{service_name}")
+                        updated_tasks[service_name] = is_done
+                        if is_done:
+                            completed_count += 1
+                    
+                    total_tasks = len(updated_tasks)
+                    progress = completed_count / total_tasks if total_tasks > 0 else 0
+                    st.progress(progress)
+                    st.caption(f"{t['completion_rate']} {completed_count}/{total_tasks} ({int(progress * 100)}%)")
+                    
+                    if st.button(t["save_tasks"]):
+                        c.execute("UPDATE clients SET tasks_status = ? WHERE id = ?", 
+                                  (json.dumps(updated_tasks, ensure_ascii=False), selected_id))
+                        conn.commit()
+                        st.success(t["tasks_saved"])
+                        st.rerun()
+                else:
+                    st.info("No services listed for this package.")
+            else:
+                st.warning(t["no_pkg_assigned"])
+        else:
+            st.info(t["no_clients"])
+            
+        conn.close()
+
+    # --- 3. Log Expense ---
     elif choice == t["expenses"]:
         st.title(f"💸 {t['expenses']}")
         conn = get_db_connection()
         c = conn.cursor()
         
         with st.form("add_expense_form"):
-            e_title = st.text_input("بيان المصروف (السبب/الوصف)")
-            e_amount = st.number_input("المبلغ", min_value=0.0)
-            e_cat = st.selectbox("القسم", ["تشغيلي", "معدات", "تسويق", "رواتب", "أخرى"])
+            e_title = st.text_input(t["exp_title"])
+            e_amount = st.number_input(t["amount"], min_value=0.0)
+            e_cat = st.selectbox(t["category"], ["Operational / تشغيلي", "Equipment / معدات", "Marketing / تسويق", "Salaries / رواتب", "Other / أخرى"])
             
-            if st.form_submit_button("تسجيل المصروف"):
+            if st.form_submit_button(t["log_exp_btn"]):
                 if e_title and e_amount > 0:
                     c.execute("INSERT INTO expenses (title, amount, category, added_by) VALUES (?, ?, ?, ?)",
                               (e_title, e_amount, e_cat, st.session_state.user_info["name"]))
                     conn.commit()
-                    st.success("تم تسجيل المصروف بنجاح!")
+                    st.success(t["exp_saved"])
                 else:
-                    st.error("يرجى إدخال المبلغ والبيان بشكل صحيح.")
+                    st.error(t["exp_err"])
         conn.close()
 
-    # --- 4. إدارة الباقات ---
+    # --- 4. Packages Management ---
     elif choice == t["packages"]:
         st.title(f"📦 {t['packages']}")
         conn = get_db_connection()
@@ -389,7 +530,7 @@ else:
                         c.execute("INSERT INTO packages (name, price, details) VALUES (?, ?, ?)", 
                                   (p_name, p_price, p_details))
                         conn.commit()
-                        st.success("تمت إضافة الباقة بنجاح!")
+                        st.success("Package added successfully!")
                         st.rerun()
         
         df_pkgs = pd.read_sql_query("SELECT id, name, price, details FROM packages", conn)
@@ -397,22 +538,22 @@ else:
         
         if role == "Owner" and not df_pkgs.empty:
             st.divider()
-            st.subheader("🗑️ حذف باقة")
-            pkg_to_delete = st.selectbox("اختر الباقة للحذف", df_pkgs["name"].tolist())
-            if st.button("حذف الباقة المختارة"):
+            st.subheader(f"🗑️ {t['delete_pkg']}")
+            pkg_to_delete = st.selectbox("Select Package to delete", df_pkgs["name"].tolist())
+            if st.button("Delete Selected Package"):
                 c.execute("DELETE FROM packages WHERE name = ?", (pkg_to_delete,))
                 conn.commit()
-                st.success("تم حذف الباقة بنجاح!")
+                st.success(t["pkg_deleted"])
                 st.rerun()
         conn.close()
 
-    # --- 5. إدارة المستخدمين (تعديل الـ ID، الباسورد، اسم المستخدم) ---
+    # --- 5. Users Management (Edit ID, Username, Password) ---
     elif choice == t["employees"] and role == "Owner":
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
         c = conn.cursor()
         
-        # إضافة مستخدم جديد
+        # Add New User
         with st.expander(f"➕ {t['add_emp']}"):
             with st.form("add_user_form"):
                 u_name = st.text_input(t["fullname"])
@@ -435,23 +576,22 @@ else:
         st.divider()
         col_edit, col_del = st.columns(2)
         
-        # تعديل الـ ID، اسم المستخدم، والرقم السري
+        # Edit ID, Username & Password
         with col_edit:
             st.subheader("✏️ " + t["edit"])
             user_list = df_users["username"].tolist()
-            selected_user = st.selectbox("اختر المستخدم للتعديل", user_list)
+            selected_user = st.selectbox(t["select_user_edit"], user_list)
             
-            # جلب البيانات الحالية للمستخدم
             c.execute("SELECT id, username, role FROM users WHERE username = ?", (selected_user,))
             current_user_data = c.fetchone()
             
-            new_id = st.number_input("تعديل رقم الـ ID", value=int(current_user_data[0]), step=1)
-            new_username = st.text_input("اسم المستخدم الجديد (Username)", value=current_user_data[1])
-            new_role = st.selectbox("الرتبة الجديدة", ["Customer Service", "Editor", "Moderator", "Owner"], 
+            new_id = st.number_input(t["edit_id"], value=int(current_user_data[0]), step=1)
+            new_username = st.text_input(t["new_username"], value=current_user_data[1])
+            new_role = st.selectbox(t["new_role"], ["Customer Service", "Editor", "Moderator", "Owner"], 
                                     index=["Customer Service", "Editor", "Moderator", "Owner"].index(current_user_data[2]))
-            new_password = st.text_input("كلمة المرور الجديدة (اتركها فارغة إذا لا تريد التغيير)", type="password")
+            new_password = st.text_input(t["new_pw"], type="password")
             
-            if st.button("حفظ جميع التعديلات"):
+            if st.button(t["save_user_changes"]):
                 try:
                     if new_password.strip() != "":
                         c.execute("UPDATE users SET id = ?, username = ?, role = ?, password = ? WHERE username = ?", 
@@ -460,24 +600,24 @@ else:
                         c.execute("UPDATE users SET id = ?, username = ?, role = ? WHERE username = ?", 
                                   (new_id, new_username, new_role, selected_user))
                     conn.commit()
-                    st.success("تم تحديث بيانات المستخدم والرقم السري بنجاح!")
+                    st.success(t["user_updated"])
                     st.rerun()
                 except sqlite3.IntegrityError:
-                    st.error("رقم الـ ID أو اسم المستخدم الجديد مستخدم بالفعل!")
+                    st.error(t["user_exists"])
 
-        # حذف مستخدم
+        # Delete User
         with col_del:
-            st.subheader("🗑️ " + t["delete"])
-            user_to_del = st.selectbox("اختر المستخدم للحذف", [u for u in user_list if u != "admin"])
-            if st.button("حذف المستخدم"):
+            st.subheader("🗑️ " + t["delete_user"])
+            user_to_del = st.selectbox("Select user to delete", [u for u in user_list if u != "admin"])
+            if st.button("Delete User"):
                 c.execute("DELETE FROM users WHERE username = ?", (user_to_del,))
                 conn.commit()
-                st.success("تم حذف المستخدم بنجاح!")
+                st.success(t["user_deleted"])
                 st.rerun()
                 
         conn.close()
 
-    # --- 6. شيت المصروفات والتدقيق (خاص بـ Owner فقط) ---
+    # --- 6. Expenses Sheet & Audit (Owner Only) ---
     elif choice == t["audit"] and role == "Owner":
         st.title(f"📊 {t['audit']}")
         conn = get_db_connection()
@@ -486,16 +626,16 @@ else:
         df_exp = pd.read_sql_query("SELECT id, title, amount, category, added_by, date FROM expenses", conn)
         
         col1, col2 = st.columns([3, 1])
-        col1.metric("إجمالي المصروفات", f"{df_exp['amount'].sum() if not df_exp.empty else 0:,.2f} EGP")
+        col1.metric(t["total_exp"], f"{df_exp['amount'].sum() if not df_exp.empty else 0:,.2f} EGP")
         
         if not df_exp.empty:
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df_exp.to_excel(writer, index=False, sheet_name='المصروفات')
+                df_exp.to_excel(writer, index=False, sheet_name='Expenses')
             excel_data = output.getvalue()
             
             col2.download_button(
-                label="📥 سحب شيت المصروفات (Excel)",
+                label=t["export_excel"],
                 data=excel_data,
                 file_name="expenses_report.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -506,12 +646,12 @@ else:
         
         if not df_exp.empty:
             st.divider()
-            st.subheader("🗑️ مسح مصروف محدد")
-            exp_to_delete = st.selectbox("اختر رقم المصروف لمسحه", df_exp["id"].tolist())
-            if st.button("حذف المصروف المحدد"):
+            st.subheader(f"🗑️ {t['delete_exp']}")
+            exp_to_delete = st.selectbox("Select expense ID to delete", df_exp["id"].tolist())
+            if st.button("Delete Selected Expense"):
                 c.execute("DELETE FROM expenses WHERE id = ?", (exp_to_delete,))
                 conn.commit()
-                st.success("تم مسح المصروف بنجاح!")
+                st.success(t["exp_deleted"])
                 st.rerun()
                 
         conn.close()
