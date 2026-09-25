@@ -38,6 +38,17 @@ else:
         layout="wide"
     )
 
+# --- Hide Streamlit Header & GitHub Icon ---
+hide_github_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    .stAppHeader {display: none;}
+    </style>
+"""
+st.markdown(hide_github_style, unsafe_allow_html=True)
+
 def get_image_base64(image_path):
     if image_path and os.path.exists(image_path):
         with open(image_path, "rb") as img_file:
@@ -94,6 +105,30 @@ def get_db_connection():
         )
     ''')
     
+    # Expenses Table (Outcomes / المصروفات)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS expenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            amount REAL NOT NULL,
+            category TEXT,
+            added_by TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Incomes Table (Incomes / الإيرادات والداخل للشركة)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS incomes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_name TEXT NOT NULL,
+            package_name TEXT NOT NULL,
+            amount REAL NOT NULL,
+            added_by TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
     # Auto-Migrations
     c.execute("PRAGMA table_info(packages)")
     pkg_cols = [col[1] for col in c.fetchall()]
@@ -116,18 +151,6 @@ def get_db_connection():
         except Exception:
             pass
 
-    # Expenses Table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            amount REAL NOT NULL,
-            category TEXT,
-            added_by TEXT,
-            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
     # Default Owner User Configuration
     owner_username = "Eng Abdelrhman Osama"
     default_password = hash_pass("#Bedo-1428")
@@ -192,7 +215,7 @@ translations = {
         "expenses": "Log Expense",
         "packages": "Packages Management",
         "employees": "Users Management",
-        "audit": "Expenses & Audit (Owner Only)",
+        "audit": "Financial Audit & Sheets (Owner Only)",
         "logout": "Logout",
         "status": "System Status",
         "active": "Active 🟢",
@@ -213,7 +236,7 @@ translations = {
         "phone": "Phone Number",
         "select_package": "Select Package",
         "notes": "Notes",
-        "client_added": "Client added successfully!",
+        "client_added": "Client added and income logged successfully!",
         "clients_list": "Subscribed Clients List",
         "track_services": "Track Package Services & Tasks",
         "select_client_track": "Select client to view or update services:",
@@ -237,8 +260,10 @@ translations = {
         "user_updated": "User details and password updated successfully!",
         "delete_user": "Delete User",
         "user_deleted": "User deleted successfully!",
-        "total_exp": "Total Expenses",
-        "export_excel": "📥 Export Expenses Sheet (Excel)",
+        "total_exp": "Total Expenses (Outcomes)",
+        "total_inc": "Total Revenue (Incomes)",
+        "net_profit": "Net Profit",
+        "export_excel": "📥 Export Full Audit Report (Excel)",
         "delete_exp": "Delete Expense",
         "exp_deleted": "Expense deleted successfully!",
         "no_clients": "No clients registered yet.",
@@ -263,7 +288,7 @@ translations = {
         "expenses": "تسجيل مصروف",
         "packages": "إدارة الباقات",
         "employees": "إدارة المستخدمين",
-        "audit": "شيت المصروفات والتدقيق (المالك فقط)",
+        "audit": "شيت الحسابات والتدقيق المالي (المالك فقط)",
         "logout": "تسجيل الخروج",
         "status": "حالة النظام",
         "active": "نشط 🟢",
@@ -284,7 +309,7 @@ translations = {
         "phone": "رقم الهاتف",
         "select_package": "اختر الباقة",
         "notes": "ملاحظات",
-        "client_added": "تمت إضافة العميل بنجاح!",
+        "client_added": "تمت إضافة العميل وتسجيل دخل الباقة تلقائياً في الشيت!",
         "clients_list": "قائمة العملاء المشتركين",
         "track_services": "متابعة تنفيذ خدمات الباقة للعملاء",
         "select_client_track": "اختر العميل لمتابعة أو تقديم الخدمات الخاصة به:",
@@ -308,8 +333,10 @@ translations = {
         "user_updated": "تم تحديث بيانات المستخدم والرقم السري بنجاح!",
         "delete_user": "حذف مستخدم",
         "user_deleted": "تم حذف المستخدم بنجاح!",
-        "total_exp": "إجمالي المصروفات",
-        "export_excel": "📥 سحب شيت المصروفات (Excel)",
+        "total_exp": "إجمالي المصروفات (الخارج)",
+        "total_inc": "إجمالي الإيرادات (الداخل)",
+        "net_profit": "صافي أرباح الشركة",
+        "export_excel": "📥 سحب الشيت المالي المكتمل (Excel)",
         "delete_exp": "مسح مصروف محدد",
         "exp_deleted": "تم مسح المصروف بنجاح!",
         "no_clients": "لا يوجد عملاء مسجلين حالياً.",
@@ -427,15 +454,15 @@ else:
                 c_name = st.text_input(t["client_name"])
                 c_phone = st.text_input(t["phone"])
                 
-                pkgs = pd.read_sql_query("SELECT id, name, details FROM packages", conn)
-                pkg_options = {row['name']: (row['id'], row['details']) for _, row in pkgs.iterrows()} if not pkgs.empty else {}
+                pkgs = pd.read_sql_query("SELECT id, name, price, details FROM packages", conn)
+                pkg_options = {f"{row['name']} ({row['price']:,.0f} EGP)": (row['id'], row['price'], row['details'], row['name']) for _, row in pkgs.iterrows()} if not pkgs.empty else {}
                 
-                selected_pkg_name = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["N/A"])
+                selected_pkg_str = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["N/A"])
                 c_notes = st.text_area(t["notes"])
                 
                 if st.form_submit_button(t["save"]):
                     if c_name and pkg_options:
-                        pkg_id, pkg_details = pkg_options[selected_pkg_name]
+                        pkg_id, pkg_price, pkg_details, pkg_name = pkg_options[selected_pkg_str]
                         
                         initial_tasks = {}
                         if pkg_details:
@@ -445,8 +472,14 @@ else:
                         
                         current_date_str = datetime.now().strftime("%Y-%m-%d")
                         
+                        # 1. Insert Client Record
                         c.execute("INSERT INTO clients (client_name, phone, package_id, notes, tasks_status, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                                   (c_name, c_phone, pkg_id, c_notes, json.dumps(initial_tasks, ensure_ascii=False), current_date_str))
+                        
+                        # 2. Insert Income Record (تسجيل الدخل والداخل للشركة تلقائياً)
+                        c.execute("INSERT INTO incomes (client_name, package_name, amount, added_by) VALUES (?, ?, ?, ?)",
+                                  (c_name, pkg_name, pkg_price, st.session_state.user_info["name"]))
+                        
                         conn.commit()
                         st.success(t["client_added"])
                         st.rerun()
@@ -631,7 +664,7 @@ else:
                 st.rerun()
         conn.close()
 
-    # --- 5. Users Management (Edit ID, Username, Password) ---
+    # --- 5. Users Management ---
     elif choice == t["employees"] and role == "Owner":
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
@@ -702,41 +735,65 @@ else:
                 
         conn.close()
 
-    # --- 6. Expenses Sheet & Audit (Owner Only) ---
+    # --- 6. Expenses, Incomes & Full Audit Sheet (Owner Only) ---
     elif choice == t["audit"] and role == "Owner":
         st.title(f"📊 {t['audit']}")
         conn = get_db_connection()
         c = conn.cursor()
         
         df_exp = pd.read_sql_query("SELECT id, title, amount, category, added_by, date FROM expenses", conn)
+        df_inc = pd.read_sql_query("SELECT id, client_name, package_name, amount, added_by, date FROM incomes", conn)
         
-        col1, col2 = st.columns([3, 1])
-        col1.metric(t["total_exp"], f"{df_exp['amount'].sum() if not df_exp.empty else 0:,.2f} EGP")
+        total_outcomes = df_exp['amount'].sum() if not df_exp.empty else 0.0
+        total_incomes = df_inc['amount'].sum() if not df_inc.empty else 0.0
+        net_profit = total_incomes - total_outcomes
         
-        if not df_exp.empty:
-            output = BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df_exp.to_excel(writer, index=False, sheet_name='Expenses')
-            excel_data = output.getvalue()
+        col1, col2, col3 = st.columns(3)
+        col1.metric(t["total_inc"], f"{total_incomes:,.2f} EGP")
+        col2.metric(t["total_exp"], f"{total_outcomes:,.2f} EGP")
+        col3.metric(t["net_profit"], f"{net_profit:,.2f} EGP", delta=f"{net_profit:,.2f} EGP")
+        
+        st.divider()
+        
+        # Excel Export Setup
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df_summary = pd.DataFrame({
+                'البيان': ['إجمالي الإيرادات (الداخل)', 'إجمالي المصروفات (الخارج)', 'صافي الأرباح'],
+                'المبلغ (EGP)': [total_incomes, total_outcomes, net_profit]
+            })
+            df_summary.to_excel(writer, index=False, sheet_name='الملخص المالي')
+            df_inc.to_excel(writer, index=False, sheet_name='الإيرادات (الداخل)')
+            df_exp.to_excel(writer, index=False, sheet_name='المصروفات (الخارج)')
             
-            col2.download_button(
-                label=t["export_excel"],
-                data=excel_data,
-                file_name="expenses_report.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
-            
-        st.dataframe(df_exp, use_container_width=True)
+        excel_data = output.getvalue()
         
-        if not df_exp.empty:
-            st.divider()
-            st.subheader(f"🗑️ {t['delete_exp']}")
-            exp_to_delete = st.selectbox("Select expense ID to delete", df_exp["id"].tolist())
-            if st.button("Delete Selected Expense"):
-                c.execute("DELETE FROM expenses WHERE id = ?", (exp_to_delete,))
-                conn.commit()
-                st.success(t["exp_deleted"])
-                st.rerun()
+        st.download_button(
+            label=t["export_excel"],
+            data=excel_data,
+            file_name="focal_craft_financial_audit.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
+        
+        tab_inc, tab_exp = st.tabs(["🟢 الإيرادات (الداخل للشركة)", "🔴 المصروفات (الخارج من الشركة)"])
+        
+        with tab_inc:
+            st.subheader("📋 قائمة اشتراكات العملاء والإيرادات")
+            st.dataframe(df_inc, use_container_width=True)
+            
+        with tab_exp:
+            st.subheader("📋 قائمة المصروفات التشغيلية")
+            st.dataframe(df_exp, use_container_width=True)
+            
+            if not df_exp.empty:
+                st.divider()
+                st.subheader(f"🗑️ {t['delete_exp']}")
+                exp_to_delete = st.selectbox("اختر رقم المصروف لمسحه:", df_exp["id"].tolist())
+                if st.button("مسح المصروف المحدد"):
+                    c.execute("DELETE FROM expenses WHERE id = ?", (exp_to_delete,))
+                    conn.commit()
+                    st.success(t["exp_deleted"])
+                    st.rerun()
                 
         conn.close()
