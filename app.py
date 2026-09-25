@@ -174,197 +174,102 @@ def check_login(username, password):
     return user
 
 # ==========================================
-# 3. Session State & Multi-Language Dictionary
+# 3. Session State & Language Setup
 # ==========================================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
-if "lang" not in st.session_state:
-    st.session_state.lang = "EN"
-if "theme" not in st.session_state:
-    st.session_state.theme = "Dark"
 
-if st.session_state.theme == "Light":
-    st.markdown("""
-        <style>
-        .stApp {
-            background-color: #f8fafc !important;
-            color: #0f172a !important;
-        }
-        .stSidebar {
-            background-color: #e2e8f0 !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-translations = {
-    "EN": {
-        "title": "Focal Craft Team",
-        "subtitle": "Unified Company Management System",
-        "username": "Username",
-        "password": "Password",
-        "login_btn": "Login",
-        "login_success": "Logged in successfully!",
-        "login_error": "Invalid username or password",
-        "welcome": "Welcome",
-        "role": "Role",
-        "nav": "Navigation",
-        "home": "Home Page",
-        "cs": "Clients & Services Tracking",
-        "expenses": "Log Expense",
-        "packages": "Packages Management",
-        "employees": "Users Management",
-        "audit": "Financial Audit & Sheets (Owner Only)",
-        "logout": "Logout",
-        "status": "System Status",
-        "active": "Active 🟢",
-        "add_pkg": "Add New Package",
-        "pkg_name": "Package Name",
-        "price": "Price",
-        "pkg_duration": "Package Duration (Days)",
-        "details": "Package Services (Separate with commas or new lines)",
-        "save": "Save",
-        "add_emp": "Add New User",
-        "fullname": "Full Name",
-        "emp_added": "User added successfully!",
-        "user_exists": "Username or ID already exists!",
-        "delete": "Delete",
-        "edit": "Edit User Details, ID & Password",
-        "add_client": "Add New Client",
-        "client_name": "Client Name",
-        "phone": "Phone Number",
-        "select_package": "Select Package",
-        "notes": "Notes",
-        "client_added": "Client added and income logged successfully!",
-        "clients_list": "Subscribed Clients List",
-        "track_services": "Track Package Services & Tasks",
-        "select_client_track": "Select client to view or update services:",
-        "save_tasks": "Save Service Status 💾",
-        "tasks_saved": "Client service status updated successfully!",
-        "no_packages_err": "Please contact owner to add packages first!",
-        "exp_title": "Expense Title / Description",
-        "amount": "Amount",
-        "category": "Category",
-        "log_exp_btn": "Log Expense",
-        "exp_saved": "Expense logged successfully!",
-        "exp_err": "Please enter valid title and amount.",
-        "delete_pkg": "Delete Package",
-        "pkg_deleted": "Package deleted successfully!",
-        "select_user_edit": "Select user to edit",
-        "edit_id": "Edit User ID",
-        "new_username": "New Username",
-        "new_role": "New Role",
-        "new_pw": "New Password (Leave blank to keep unchanged)",
-        "save_user_changes": "Save User Changes",
-        "user_updated": "User details and password updated successfully!",
-        "delete_user": "Delete User",
-        "user_deleted": "User deleted successfully!",
-        "total_exp": "Total Expenses (Outcomes)",
-        "total_inc": "Total Revenue (Incomes)",
-        "net_profit": "Net Profit",
-        "export_excel": "📥 Export Full Audit Report (Excel)",
-        "delete_exp": "Delete Expense",
-        "exp_deleted": "Expense deleted successfully!",
-        "no_clients": "No clients registered yet.",
-        "no_pkg_assigned": "Client is not assigned to any package.",
-        "completion_rate": "Service Completion Rate:",
-        "delete_client": "Delete Client (Owner Only)",
-        "client_deleted": "Client deleted successfully!"
-    },
-    "AR": {
-        "title": "فوكال كرافت تيم",
-        "subtitle": "نظام إدارة الشركة الموحد",
-        "username": "اسم المستخدم",
-        "password": "كلمة المرور",
-        "login_btn": "تسجيل الدخول",
-        "login_success": "تم تسجيل الدخول بنجاح!",
-        "login_error": "اسم المستخدم أو كلمة المرور غير صحيحة",
-        "welcome": "مرحباً بك",
-        "role": "الصلاحية",
-        "nav": "التنقل",
-        "home": "الصفحة الرئيسية",
-        "cs": "إدارة العملاء ومتابعة الخدمات",
-        "expenses": "تسجيل مصروف",
-        "packages": "إدارة الباقات",
-        "employees": "إدارة المستخدمين",
-        "audit": "شيت الحسابات والتدقيق المالي (المالك فقط)",
-        "logout": "تسجيل الخروج",
-        "status": "حالة النظام",
-        "active": "نشط 🟢",
-        "add_pkg": "إضافة باقة جديدة",
-        "pkg_name": "اسم الباقة",
-        "price": "السعر",
-        "pkg_duration": "مدة الباقة (بالأيام)",
-        "details": "تفاصيل الخدمات (افصل بين كل خدمة بفاصلة أو سطر جديد)",
-        "save": "حفظ",
-        "add_emp": "إضافة مستخدم جديد",
-        "fullname": "الاسم الكامل",
-        "emp_added": "تمت إضافة المستخدم بنجاح!",
-        "user_exists": "اسم المستخدم أو ID موجود بالفعل!",
-        "delete": "حذف",
-        "edit": "تعديل البيانات، الـ ID وكلمة المرور",
-        "add_client": "إضافة عميل جديد",
-        "client_name": "اسم العميل",
-        "phone": "رقم الهاتف",
-        "select_package": "اختر الباقة",
-        "notes": "ملاحظات",
-        "client_added": "تمت إضافة العميل وتسجيل دخل الباقة تلقائياً في الشيت!",
-        "clients_list": "قائمة العملاء المشتركين",
-        "track_services": "متابعة تنفيذ خدمات الباقة للعملاء",
-        "select_client_track": "اختر العميل لمتابعة أو تقديم الخدمات الخاصة به:",
-        "save_tasks": "حفظ تحديثات الخدمات 💾",
-        "tasks_saved": "تم حفظ حالة الخدمات للعميل بنجاح!",
-        "no_packages_err": "يرجى التواصل مع المالك لإضافة باقات أولاً!",
-        "exp_title": "بيان المصروف (السبب/الوصف)",
-        "amount": "المبلغ",
-        "category": "القسم",
-        "log_exp_btn": "تسجيل المصروف",
-        "exp_saved": "تم تسجيل المصروف بنجاح!",
-        "exp_err": "يرجى إدخال المبلغ والبيان بشكل صحيح.",
-        "delete_pkg": "حذف باقة",
-        "pkg_deleted": "تم حذف الباقة بنجاح!",
-        "select_user_edit": "اختر المستخدم للتعديل",
-        "edit_id": "تعديل رقم الـ ID",
-        "new_username": "اسم المستخدم الجديد",
-        "new_role": "الرتبة الجديدة",
-        "new_pw": "كلمة المرور الجديدة (اتركها فارغة إذا لا تريد التغيير)",
-        "save_user_changes": "حفظ جميع التعديلات",
-        "user_updated": "تم تحديث بيانات المستخدم والرقم السري بنجاح!",
-        "delete_user": "حذف مستخدم",
-        "user_deleted": "تم حذف المستخدم بنجاح!",
-        "total_exp": "إجمالي المصروفات (الخارج)",
-        "total_inc": "إجمالي الإيرادات (الداخل)",
-        "net_profit": "صافي أرباح الشركة",
-        "export_excel": "📥 سحب الشيت المالي المكتمل (Excel)",
-        "delete_exp": "مسح مصروف محدد",
-        "exp_deleted": "تم مسح المصروف بنجاح!",
-        "no_clients": "لا يوجد عملاء مسجلين حالياً.",
-        "no_pkg_assigned": "العميل غير مشترك في باقة حالياً.",
-        "completion_rate": "نسبة إنجاز الخدمات:",
-        "delete_client": "حذف عميل (المالك فقط)",
-        "client_deleted": "تم حذف العميل بنجاح!"
-    }
+t = {
+    "title": "فوكال كرافت تيم",
+    "subtitle": "نظام إدارة الشركة الموحد",
+    "username": "اسم المستخدم",
+    "password": "كلمة المرور",
+    "login_btn": "تسجيل الدخول",
+    "login_success": "تم تسجيل الدخول بنجاح!",
+    "login_error": "اسم المستخدم أو كلمة المرور غير صحيحة",
+    "welcome": "مرحباً بك",
+    "role": "الصلاحية",
+    "nav": "التنقل القائمة",
+    "home": "الصفحة الرئيسية",
+    "cs": "إدارة العملاء ومتابعة الخدمات",
+    "expenses": "تسجيل مصروف",
+    "packages": "إدارة الباقات",
+    "employees": "إدارة المستخدمين",
+    "audit": "شيت الحسابات والتدقيق المالي (المالك فقط)",
+    "logout": "تسجيل الخروج",
+    "status": "حالة النظام",
+    "active": "نشط 🟢",
+    "add_pkg": "إضافة باقة جديدة",
+    "pkg_name": "اسم الباقة",
+    "price": "السعر",
+    "pkg_duration": "مدة الباقة (بالأيام)",
+    "details": "تفاصيل الخدمات (افصل بين كل خدمة بفاصلة أو سطر جديد)",
+    "save": "حفظ",
+    "add_emp": "إضافة مستخدم جديد",
+    "fullname": "الاسم الكامل",
+    "emp_added": "تمت إضافة المستخدم بنجاح!",
+    "user_exists": "اسم المستخدم أو ID موجود بالفعل!",
+    "delete": "حذف",
+    "edit": "تعديل البيانات، الـ ID وكلمة المرور",
+    "add_client": "إضافة عميل جديد",
+    "client_name": "اسم العميل",
+    "phone": "رقم الهاتف",
+    "select_package": "اختر الباقة",
+    "notes": "ملاحظات",
+    "client_added": "تمت إضافة العميل وتسجيل دخل الباقة تلقائياً في الشيت!",
+    "clients_list": "قائمة العملاء المشتركين",
+    "track_services": "متابعة تنفيذ خدمات الباقة للعملاء",
+    "select_client_track": "اختر العميل لمتابعة أو تقديم الخدمات الخاصة به:",
+    "save_tasks": "حفظ تحديثات الخدمات 💾",
+    "tasks_saved": "تم حفظ حالة الخدمات للعميل بنجاح!",
+    "no_packages_err": "يرجى التواصل مع المالك لإضافة باقات أولاً!",
+    "exp_title": "بيان المصروف (السبب/الوصف)",
+    "amount": "المبلغ",
+    "category": "القسم",
+    "log_exp_btn": "تسجيل المصروف",
+    "exp_saved": "تم تسجيل المصروف بنجاح!",
+    "exp_err": "يرجى إدخال المبلغ والبيان بشكل صحيح.",
+    "delete_pkg": "حذف باقة",
+    "pkg_deleted": "تم حذف الباقة بنجاح!",
+    "select_user_edit": "اختر المستخدم للتعديل",
+    "edit_id": "تعديل رقم الـ ID",
+    "new_username": "اسم المستخدم الجديد",
+    "new_role": "الرتبة الجديدة",
+    "new_pw": "كلمة المرور الجديدة (اتركها فارغة إذا لا تريد التغيير)",
+    "save_user_changes": "حفظ جميع التعديلات",
+    "user_updated": "تم تحديث بيانات المستخدم والرقم السري بنجاح!",
+    "delete_user": "حذف مستخدم",
+    "user_deleted": "تم حذف المستخدم بنجاح!",
+    "total_exp": "إجمالي المصروفات (الخارج)",
+    "total_inc": "إجمالي الإيرادات (الداخل)",
+    "net_profit": "صافي أرباح الشركة",
+    "export_excel": "📥 سحب الشيت المالي المكتمل (Excel)",
+    "delete_exp": "مسح مصروف محدد",
+    "exp_deleted": "تم مسح المصروف بنجاح!",
+    "no_clients": "لا يوجد عملاء مسجلين حالياً.",
+    "no_pkg_assigned": "العميل غير مشترك في باقة حالياً.",
+    "completion_rate": "نسبة إنجاز الخدمات:",
+    "delete_client": "حذف عميل (المالك فقط)",
+    "client_deleted": "تم حذف العميل بنجاح!"
 }
-
-t = translations[st.session_state.lang]
 
 # ==========================================
 # 4. Login Interface
 # ==========================================
 if not st.session_state.logged_in:
-    if st.session_state.theme == "Dark":
-        bg_style = f"""
-        <style>
-        .stApp {{
-            background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
-                        url('data:image/jpeg;base64,{logo_base64}');
-            background-size: cover;
-            background-position: center;
-        }}
-        </style>
-        """
-        st.markdown(bg_style, unsafe_allow_html=True)
+    bg_style = f"""
+    <style>
+    .stApp {{
+        background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
+                    url('data:image/jpeg;base64,{logo_base64}');
+        background-size: cover;
+        background-position: center;
+    }}
+    </style>
+    """
+    st.markdown(bg_style, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -372,15 +277,6 @@ if not st.session_state.logged_in:
             st.image(logo_img, width=150)
         st.markdown(f"<h2 style='text-align: center;'>{t['title']}</h2>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align: center;'>{t['subtitle']}</p>", unsafe_allow_html=True)
-        
-        col_lang, col_theme = st.columns(2)
-        with col_lang:
-            selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], horizontal=True)
-            st.session_state.lang = "EN" if selected_lang == "English" else "AR"
-            t = translations[st.session_state.lang]
-        with col_theme:
-            theme_choice = st.radio("☀️ Theme / المظهر", ["Dark", "Light"], horizontal=True)
-            st.session_state.theme = theme_choice
 
         with st.form("login_form"):
             username = st.text_input(t["username"])
@@ -407,15 +303,6 @@ else:
         st.title(t["title"])
         st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
         st.caption(f"{t['role']}: {st.session_state.user_info['role']}")
-        
-        lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
-                               index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
-        st.session_state.lang = "EN" if lang_choice == "English" else "AR"
-        t = translations[st.session_state.lang]
-        
-        theme_toggle = st.radio("☀️ Theme / المظهر", ["Dark 🌙", "Light ☀️"], 
-                                index=0 if st.session_state.theme == "Dark" else 1, horizontal=True)
-        st.session_state.theme = "Dark" if "Dark" in theme_toggle else "Light"
         
         st.divider()
         
