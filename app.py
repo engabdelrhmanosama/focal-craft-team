@@ -65,7 +65,8 @@ def get_db_connection():
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
             role TEXT NOT NULL,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            salary REAL DEFAULT 0.0
         )
     ''')
     
@@ -96,7 +97,7 @@ def get_db_connection():
         )
     ''')
     
-    # Employee Assigned Tasks Table (نظام إدارة مهام الموظفين الجديد)
+    # Assigned Tasks Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS assigned_tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,6 +135,14 @@ def get_db_connection():
     ''')
     
     # Auto-Migrations
+    c.execute("PRAGMA table_info(users)")
+    user_cols = [col[1] for col in c.fetchall()]
+    if 'salary' not in user_cols:
+        try:
+            c.execute("ALTER TABLE users ADD COLUMN salary REAL DEFAULT 0.0")
+        except Exception:
+            pass
+
     c.execute("PRAGMA table_info(packages)")
     pkg_cols = [col[1] for col in c.fetchall()]
     if 'duration_days' not in pkg_cols:
@@ -173,8 +182,8 @@ def get_db_connection():
     owner_user = c.fetchone()
     
     if not owner_user:
-        c.execute("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
-                  (owner_username, default_password, 'Owner', owner_username))
+        c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
+                  (owner_username, default_password, 'Owner', owner_username, 0.0))
     conn.commit()
     return conn
 
@@ -226,11 +235,10 @@ translations = {
         "nav": "Navigation",
         "home": "Home Page",
         "my_tasks": "My Assigned Tasks",
-        "track_emp": "Employees Task Tracking (Owner & Manager)",
         "cs": "Clients & Services Tracking",
         "expenses": "Log Expense",
         "packages": "Packages Management",
-        "employees": "Users Management",
+        "employees": "Employee Hub & Tasks",
         "audit": "Financial Audit & Sheet (Owner Only)",
         "logout": "Logout",
         "status": "System Status",
@@ -248,7 +256,7 @@ translations = {
         "emp_added": "User added successfully!",
         "user_exists": "Username or ID already exists!",
         "delete": "Delete",
-        "edit": "Edit User Details, ID & Password",
+        "edit": "Edit User Details, Salary & Password",
         "add_client": "Add New Client",
         "client_name": "Client Name",
         "phone": "Phone Number",
@@ -272,7 +280,7 @@ translations = {
         "select_user_edit": "Select user to edit",
         "edit_id": "Edit User ID",
         "new_username": "New Username",
-        "new_role": "New Role",
+        "new_role": "New Role / Title",
         "new_pw": "New Password (Leave blank to keep unchanged)",
         "save_user_changes": "Save User Changes",
         "user_updated": "User details and password updated successfully!",
@@ -303,11 +311,10 @@ translations = {
         "nav": "التنقل",
         "home": "الصفحة الرئيسية",
         "my_tasks": "مهامي والشغل المطلوب",
-        "track_emp": "متابعة إنجاز الموظفين (الأونر والمدير)",
         "cs": "إدارة العملاء ومتابعة الخدمات",
         "expenses": "تسجيل مصروف",
         "packages": "إدارة الباقات",
-        "employees": "إدارة المستخدمين",
+        "employees": "مركز الموظفين وإنجاز المهام",
         "audit": "شيت الحسابات والتدقيق المالي (المالك فقط)",
         "logout": "تسجيل الخروج",
         "status": "حالة النظام",
@@ -320,12 +327,12 @@ translations = {
         "editor_tasks": "مهام المونتير/الإيديتور (مثل: مونتاج 3 فيديوهات وصورة)",
         "social_tasks": "مهام مسؤول السوشيال ميديا (مثل: كتابة 3 بوستات ونشرها)",
         "save": "حفظ",
-        "add_emp": "إضافة مستخدم جديد",
+        "add_emp": "إضافة موظف/مستخدم جديد",
         "fullname": "الاسم الكامل",
-        "emp_added": "تمت إضافة المستخدم بنجاح!",
+        "emp_added": "تمت إضافة الموظف بنجاح!",
         "user_exists": "اسم المستخدم أو ID موجود بالفعل!",
         "delete": "حذف",
-        "edit": "تعديل البيانات، الـ ID وكلمة المرور",
+        "edit": "تعديل البيانات، المرتب، الـ ID وكلمة المرور",
         "add_client": "إضافة عميل جديد",
         "client_name": "اسم العميل",
         "phone": "رقم الهاتف",
@@ -346,15 +353,15 @@ translations = {
         "exp_err": "يرجى إدخال المبلغ والبيان بشكل صحيح.",
         "delete_pkg": "حذف باقة",
         "pkg_deleted": "تم حذف الباقة بنجاح!",
-        "select_user_edit": "اختر المستخدم للتعديل",
+        "select_user_edit": "اختر الموظف للتعديل",
         "edit_id": "تعديل رقم الـ ID",
         "new_username": "اسم المستخدم الجديد",
-        "new_role": "الرتبة الجديدة",
+        "new_role": "الوظيفة / الرتبة الجديدة",
         "new_pw": "كلمة المرور الجديدة (اتركها فارغة إذا لا تريد التغيير)",
         "save_user_changes": "حفظ جميع التعديلات",
-        "user_updated": "تم تحديث بيانات المستخدم والرقم السري بنجاح!",
-        "delete_user": "حذف مستخدم",
-        "user_deleted": "تم حذف المستخدم بنجاح!",
+        "user_updated": "تم تحديث بيانات الموظف والمرتب والرقم السري بنجاح!",
+        "delete_user": "حذف موظف",
+        "user_deleted": "تم حذف الموظف بنجاح!",
         "total_exp": "إجمالي المصروفات (الخارج)",
         "total_inc": "إجمالي الإيرادات (الداخل)",
         "net_profit": "صافي أرباح الشركة",
@@ -370,9 +377,6 @@ translations = {
 }
 
 t = translations[st.session_state.lang]
-
-# قائمة الوظائف المطلوبة بالنظام
-ROLES_LIST = ["Owner", "Manager", "Editor", "Social Media Specialist"]
 
 # ==========================================
 # 4. Login Interface
@@ -446,19 +450,15 @@ else:
         
         role = st.session_state.user_info["role"]
         
-        # توزيع صلاحيات القوائم بناءً على المسمى الوظيفي
-        menu_options = [t["home"]]
+        menu_options = [t["home"], t["my_tasks"]]
         
-        if role in ["Editor", "Social Media Specialist", "Owner"]:
-            menu_options.append(t["my_tasks"])
-            
         if role in ["Owner", "Manager"]:
-            menu_options.append(t["track_emp"])
+            menu_options.append(t["employees"])
             
         menu_options.extend([t["cs"], t["expenses"], t["packages"]])
         
         if role == "Owner":
-            menu_options.extend([t["employees"], t["audit"]])
+            menu_options.append(t["audit"])
             
         choice = st.radio(t["nav"], menu_options)
         
@@ -478,8 +478,8 @@ else:
         col2.metric(t["username"], st.session_state.user_info["username"])
         col3.metric(t["role"], st.session_state.user_info["role"])
 
-    # --- 2. My Assigned Tasks (خاص بالموظفين والإيديتور والسوشيال) ---
-    elif choice == t.get("my_tasks"):
+    # --- 2. My Assigned Tasks ---
+    elif choice == t["my_tasks"]:
         st.title(f"📋 {t['my_tasks']}")
         conn = get_db_connection()
         c = conn.cursor()
@@ -519,37 +519,144 @@ else:
                 
         conn.close()
 
-    # --- 3. Employees Task Tracking (خاص بالأونر والمدير) ---
-    elif choice == t.get("track_emp") and role in ["Owner", "Manager"]:
-        st.title(f"📊 {t['track_emp']}")
+    # --- 3. Unified Employee Hub & Task Tracking Page (إدارة الموظفين والمهام والمرتبات) ---
+    elif choice == t.get("employees") and role in ["Owner", "Manager"]:
+        st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
+        c = conn.cursor()
         
-        tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks", conn)
-        
-        if tasks_df.empty:
-            st.info("لا توجد مهام مسجلة في النظام بعد.")
-        else:
-            col1, col2, col3 = st.columns(3)
-            total_tasks = len(tasks_df)
-            done_tasks = len(tasks_df[tasks_df["status"] == "مكتمل ✅"])
-            pending = total_tasks - done_tasks
+        tab_emp_mgmt, tab_emp_tasks = st.tabs([
+            "👤 إدارة الموظفين والحسابات والمرتبات", 
+            "📊 متابعة إنجاز مهام الموظفين والتوقيت"
+        ])
 
-            col1.metric("إجمالي المهام", total_tasks)
-            col2.metric("المهام المكتملة ✅", done_tasks)
-            col3.metric("المهام المتبقية ⏳", pending)
+        # --- Tab A: الموظفين المرتبات والتعديل الحذف ---
+        with tab_emp_mgmt:
+            # 1. إضافة موظف جديد
+            with st.expander(f"➕ {t['add_emp']}"):
+                with st.form("add_user_form_unified"):
+                    col_a1, col_a2 = st.columns(2)
+                    with col_a1:
+                        u_fullname = st.text_input(t["fullname"])
+                        u_username = st.text_input(t["username"])
+                        u_password = st.text_input(t["password"], type="password")
+                    with col_a2:
+                        u_role_preset = st.selectbox("اختر الوظيفة أو اختر 'أخرى' لكتابة وظيفة جديدة", 
+                                                    ["Owner", "Manager", "Editor", "Social Media Specialist", "أخرى / Custom"])
+                        
+                        if u_role_preset == "أخرى / Custom":
+                            u_role_custom = st.text_input("اكتب الوظيفة المخصصة (مثال: Voice Over, Content Writer):")
+                            final_role = u_role_custom.strip() if u_role_custom.strip() != "" else "Employee"
+                        else:
+                            final_role = u_role_preset
+                            
+                        u_salary = st.number_input("المرتب الشهرى (EGP)", min_value=0.0, step=500.0)
+
+                    if st.form_submit_button("إضافة الموظف للنظام 🚀", use_container_width=True):
+                        if u_fullname and u_username and u_password:
+                            try:
+                                c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
+                                          (u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
+                                conn.commit()
+                                st.success(t["emp_added"])
+                                st.rerun()
+                            except sqlite3.IntegrityError:
+                                st.error(t["user_exists"])
+                        else:
+                            st.error("يرجى ملء جميع البيانات المطلوبة.")
+
+            # 2. عرض جدول الموظفين والمرتبات
+            st.subheader("📋 قائمة الموظفين والحسابات المسجلة")
+            df_users = pd.read_sql_query("SELECT id, name as 'الاسم الكامل', username as 'اسم المستخدم', role as 'الوظيفة', salary as 'المرتب (EGP)' FROM users", conn)
+            st.dataframe(df_users, use_container_width=True)
 
             st.divider()
-            st.subheader("📌 تقرير الإنجاز لكل قسم ووظيفة")
-            
-            roles_to_track = ["Editor", "Social Media Specialist"]
-            for r in roles_to_track:
-                r_tasks = tasks_df[tasks_df["assigned_role"] == r]
-                st.markdown(f"### قسم: **{r}**")
-                if r_tasks.empty:
-                    st.caption("لا توجد مهام مسجلة لهذا القسم.")
-                else:
-                    st.dataframe(r_tasks[["id", "client_name", "task_description", "status", "created_at", "completed_at"]], use_container_width=True)
+            col_edit_u, col_del_u = st.columns(2)
+
+            # 3. تعديل بيانات موظف / باسوورد / مرتب
+            with col_edit_u:
+                st.subheader("✏️ " + t["edit"])
+                user_list = df_users['اسم المستخدم'].tolist()
+                selected_user = st.selectbox(t["select_user_edit"], user_list if user_list else ["N/A"])
+                
+                if user_list and selected_user != "N/A":
+                    c.execute("SELECT id, username, role, name, salary FROM users WHERE username = ?", (selected_user,))
+                    curr_u = c.fetchone()
                     
+                    e_id = st.number_input(t["edit_id"], value=int(curr_u[0]), step=1)
+                    e_username = st.text_input(t["new_username"], value=curr_u[1])
+                    e_fullname = st.text_input(t["fullname"], value=curr_u[3])
+                    e_role = st.text_input(t["new_role"], value=curr_u[2])
+                    e_salary = st.number_input("تعديل المرتب (EGP)", value=float(curr_u[4] if curr_u[4] else 0.0), step=500.0)
+                    e_password = st.text_input(t["new_pw"], type="password")
+
+                    if st.button(t["save_user_changes"], use_container_width=True):
+                        try:
+                            if e_password.strip() != "":
+                                c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, salary = ?, password = ? WHERE username = ?", 
+                                          (e_id, e_username, e_fullname, e_role, e_salary, hash_pass(e_password), selected_user))
+                            else:
+                                c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, salary = ? WHERE username = ?", 
+                                          (e_id, e_username, e_fullname, e_role, e_salary, selected_user))
+                            conn.commit()
+                            st.success(t["user_updated"])
+                            st.rerun()
+                        except sqlite3.IntegrityError:
+                            st.error(t["user_exists"])
+
+            # 4. حذف موظف
+            with col_del_u:
+                st.subheader("🗑️ " + t["delete_user"])
+                deletable_users = [u for u in user_list if u != st.session_state.user_info["username"]]
+                if deletable_users:
+                    user_to_del = st.selectbox("اختر اسم الموظف المراد مسح حسابه نهائياً:", deletable_users)
+                    if st.button("حذف حساب الموظف ❌", type="primary", use_container_width=True):
+                        c.execute("DELETE FROM users WHERE username = ?", (user_to_del,))
+                        conn.commit()
+                        st.success(t["user_deleted"])
+                        st.rerun()
+                else:
+                    st.caption("لا يوجد حسابات موظفين أخرى قابلة للحذف.")
+
+        # --- Tab B: متابعة المهام والإنجاز والتاريخ ---
+        with tab_emp_tasks:
+            st.subheader("📈 لوحة متابعة إنجاز الموظفين وتوقيت الانتهاء")
+            
+            tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks", conn)
+            
+            if tasks_df.empty:
+                st.info("لا توجد مهام مسجلة ومحولة للموظفين حتى الآن.")
+            else:
+                col_m1, col_m2, col_m3 = st.columns(3)
+                tot = len(tasks_df)
+                dn = len(tasks_df[tasks_df["status"] == "مكتمل ✅"])
+                pn = tot - dn
+
+                col_m1.metric("إجمالي المهام المحولة", tot)
+                col_m2.metric("المهام المكتملة ✅", dn)
+                col_m3.metric("المهام قيد التنفيذ ⏳", pn)
+
+                st.divider()
+                
+                # تجميع المهام حسب الوظيفة / الموظف
+                roles_in_tasks = tasks_df["assigned_role"].unique()
+                for r in roles_in_tasks:
+                    with st.expander(f"📌 المهام الموجهة لوظيفة: **{r}**", expanded=True):
+                        sub_df = tasks_df[tasks_df["assigned_role"] == r]
+                        st.dataframe(
+                            sub_df[["id", "client_name", "task_description", "status", "created_at", "completed_at"]].rename(
+                                columns={
+                                    "id": "رقم المهمة",
+                                    "client_name": "العميل",
+                                    "task_description": "تفاصيل المهمة المطلوب تنفيذها",
+                                    "status": "حالة المهمة",
+                                    "created_at": "تاريخ الإنشاء",
+                                    "completed_at": "تاريخ وتوقيت الإنجاز ⏱️"
+                                }
+                            ), 
+                            use_container_width=True
+                        )
+
         conn.close()
 
     # --- 4. Clients & Services Checklist Tracking ---
@@ -587,11 +694,11 @@ else:
                         c.execute("INSERT INTO clients (client_name, phone, package_id, notes, tasks_status, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                                   (c_name, c_phone, pkg_id, c_notes, json.dumps(initial_tasks, ensure_ascii=False), current_date_str))
                         
-                        # 2. Insert Income Record automatically (الداخل للشركة)
+                        # 2. Insert Income Record automatically
                         c.execute("INSERT INTO incomes (client_name, package_name, amount, added_by) VALUES (?, ?, ?, ?)",
                                   (c_name, pkg_name, pkg_price, st.session_state.user_info["name"]))
                         
-                        # 3. Generate Tasks for Editor & Social Media
+                        # 3. Generate Tasks for Employees
                         if editor_t and editor_t.strip() != "":
                             c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)",
                                       (c_name, "Editor", editor_t, now_full_str))
@@ -645,7 +752,7 @@ else:
         st.subheader(f"📋 {t['clients_list']}")
         st.dataframe(df_clients, use_container_width=True)
         
-        # --- Delete Client (Owner Only) ---
+        # Delete Client (Owner Only)
         if role == "Owner" and not df_clients.empty:
             st.divider()
             st.subheader(f"🗑️ {t['delete_client']}")
@@ -737,7 +844,7 @@ else:
         with st.form("add_expense_form"):
             e_title = st.text_input(t["exp_title"])
             e_amount = st.number_input(t["amount"], min_value=0.0)
-            e_cat = st.selectbox(t["category"], ["Operational / تشغيلي", "Equipment / معدات", "Marketing / تسويق", "Salaries / رواتب", "Other / أخرى"])
+            e_cat = st.selectbox(t["category"], ["Operational / تشغيلي", "Salaries / رواتب", "Equipment / معدات", "Marketing / تسويق", "Other / أخرى"])
             
             if st.form_submit_button(t["log_exp_btn"]):
                 if e_title and e_amount > 0:
@@ -786,80 +893,7 @@ else:
                 st.rerun()
         conn.close()
 
-    # --- 7. Users Management (Roles: Owner, Manager, Editor, Social Media Specialist) ---
-    elif choice == t["employees"] and role == "Owner":
-        st.title(f"👥 {t['employees']}")
-        conn = get_db_connection()
-        c = conn.cursor()
-        
-        # Add New User
-        with st.expander(f"➕ {t['add_emp']}"):
-            with st.form("add_user_form"):
-                u_name = st.text_input(t["fullname"])
-                u_username = st.text_input(t["username"])
-                u_password = st.text_input(t["password"], type="password")
-                u_role = st.selectbox(t["role"], ROLES_LIST)
-                if st.form_submit_button(t["save"]):
-                    try:
-                        c.execute("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
-                                  (u_username, hash_pass(u_password), u_role, u_name))
-                        conn.commit()
-                        st.success(t["emp_added"])
-                        st.rerun()
-                    except sqlite3.IntegrityError:
-                        st.error(t["user_exists"])
-        
-        df_users = pd.read_sql_query("SELECT id, name, username, role FROM users", conn)
-        st.dataframe(df_users, use_container_width=True)
-        
-        st.divider()
-        col_edit, col_del = st.columns(2)
-        
-        # Edit ID, Username, Role & Password
-        with col_edit:
-            st.subheader("✏️ " + t["edit"])
-            user_list = df_users["username"].tolist()
-            selected_user = st.selectbox(t["select_user_edit"], user_list)
-            
-            c.execute("SELECT id, username, role, name FROM users WHERE username = ?", (selected_user,))
-            current_user_data = c.fetchone()
-            
-            new_id = st.number_input(t["edit_id"], value=int(current_user_data[0]), step=1)
-            new_username = st.text_input(t["new_username"], value=current_user_data[1])
-            new_fullname = st.text_input(t["fullname"], value=current_user_data[3])
-            
-            current_role = current_user_data[2]
-            role_idx = ROLES_LIST.index(current_role) if current_role in ROLES_LIST else 0
-            new_role = st.selectbox(t["new_role"], ROLES_LIST, index=role_idx)
-            new_password = st.text_input(t["new_pw"], type="password")
-            
-            if st.button(t["save_user_changes"]):
-                try:
-                    if new_password.strip() != "":
-                        c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, password = ? WHERE username = ?", 
-                                  (new_id, new_username, new_fullname, new_role, hash_pass(new_password), selected_user))
-                    else:
-                        c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ? WHERE username = ?", 
-                                  (new_id, new_username, new_fullname, new_role, selected_user))
-                    conn.commit()
-                    st.success(t["user_updated"])
-                    st.rerun()
-                except sqlite3.IntegrityError:
-                    st.error(t["user_exists"])
-
-        # Delete User
-        with col_del:
-            st.subheader("🗑️ " + t["delete_user"])
-            user_to_del = st.selectbox("Select user to delete", [u for u in user_list if u != st.session_state.user_info["username"]])
-            if st.button("Delete User"):
-                c.execute("DELETE FROM users WHERE username = ?", (user_to_del,))
-                conn.commit()
-                st.success(t["user_deleted"])
-                st.rerun()
-                
-        conn.close()
-
-    # --- 8. Expenses, Incomes & Full Audit Sheet (Owner Only) ---
+    # --- 7. Full Audit Sheet (Owner Only) ---
     elif choice == t["audit"] and role == "Owner":
         st.title(f"📊 {t['audit']}")
         conn = get_db_connection()
@@ -872,7 +906,6 @@ else:
         total_incomes = df_inc['amount'].sum() if not df_inc.empty else 0.0
         net_profit = total_incomes - total_outcomes
         
-        # Display Totals & Net Profit
         col1, col2, col3 = st.columns(3)
         col1.metric(t["total_inc"], f"{total_incomes:,.2f} EGP")
         col2.metric(t["total_exp"], f"{total_outcomes:,.2f} EGP")
@@ -880,7 +913,6 @@ else:
         
         st.divider()
         
-        # Multi-sheet Excel Export Setup
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df_summary = pd.DataFrame({
@@ -901,7 +933,6 @@ else:
             use_container_width=True
         )
         
-        # Tabs for Incomes & Expenses Tables
         tab_inc, tab_exp = st.tabs(["🟢 الإيرادات (الداخل للشركة)" if st.session_state.lang == "AR" else "🟢 Revenue (Incomes)", 
                                     "🔴 المصروفات (الخارج من الشركة)" if st.session_state.lang == "AR" else "🔴 Expenses (Outcomes)"])
         
