@@ -104,7 +104,7 @@ def get_db_connection():
             client_name TEXT NOT NULL,
             assigned_role TEXT NOT NULL,
             task_description TEXT NOT NULL,
-            status TEXT DEFAULT 'قيد التنفيذ',
+            status TEXT DEFAULT 'Pending',
             created_at TEXT,
             completed_at TEXT DEFAULT '-'
         )
@@ -251,11 +251,12 @@ translations = {
         "editor_tasks": "Editor Tasks (e.g. Edit 3 videos, Design 1 thumbnail)",
         "social_tasks": "Social Media Tasks (e.g. Write 3 posts, Schedule publishing)",
         "save": "Save",
-        "add_emp": "Add New User",
+        "add_emp": "➕ Add New Employee",
+        "add_emp_modal_title": "👤 Add New Employee",
         "fullname": "Full Name",
-        "emp_added": "User added successfully!",
+        "emp_added": "Employee added successfully!",
         "user_exists": "Username already exists!",
-        "delete": "Delete User",
+        "delete": "Delete Account",
         "edit": "Edit Details & Salary",
         "add_client": "Add New Client",
         "client_name": "Client Name",
@@ -277,7 +278,7 @@ translations = {
         "exp_err": "Please enter valid title and amount.",
         "delete_pkg": "Delete Package",
         "pkg_deleted": "Package deleted successfully!",
-        "save_user_changes": "Save User Changes",
+        "save_user_changes": "Save Changes 💾",
         "user_updated": "User details updated successfully!",
         "user_deleted": "User deleted successfully!",
         "total_exp": "Total Expenses (Outcomes)",
@@ -290,7 +291,32 @@ translations = {
         "no_pkg_assigned": "Client is not assigned to any package.",
         "completion_rate": "Service Completion Rate:",
         "delete_client": "Delete Client (Owner Only)",
-        "client_deleted": "Client deleted successfully!"
+        "client_deleted": "Client deleted successfully!",
+        "emp_team_head": "📋 Current Team Members",
+        "no_employees_msg": "No employees found.",
+        "job_title": "Job Title",
+        "salary_txt": "Monthly Salary",
+        "actions_btn": "⚙️ Actions / Edit / Delete",
+        "edit_emp_modal": "Settings for account:",
+        "new_pass_optional": "New Password (leave empty to keep current)",
+        "del_emp_permanently": "🗑️ Delete Employee Permanently",
+        "cannot_del_self": "You cannot delete your active logged-in account.",
+        "task_overview": "📈 Employee Task & Timeline Tracking",
+        "no_tasks_msg": "No tasks assigned to employees yet.",
+        "total_tasks": "Total Assigned Tasks",
+        "completed_tasks": "Completed Tasks ✅",
+        "pending_tasks": "Pending Tasks ⏳",
+        "tasks_for_role": "📌 Tasks assigned to role:",
+        "col_task_id": "Task ID",
+        "col_client": "Client Name",
+        "col_desc": "Task Description",
+        "col_status": "Status",
+        "col_created": "Date Created",
+        "col_completed": "Completion Date & Time ⏱️",
+        "tab_emp_mgmt": "👤 Employee Management (Simplified)",
+        "tab_emp_tasks": "📊 Task Completion & Timeline Tracking",
+        "search_emp_placeholder": "🔍 Search employee by Name, ID, Username, or Role...",
+        "emp_id_label": "ID"
     },
     "AR": {
         "title": "فوكال كرافت تيم",
@@ -321,7 +347,8 @@ translations = {
         "editor_tasks": "مهام المونتير/الإيديتور (مثل: مونتاج 3 فيديوهات وصورة)",
         "social_tasks": "مهام مسؤول السوشيال ميديا (مثل: كتابة 3 بوستات ونشرها)",
         "save": "حفظ",
-        "add_emp": "إضافة موظف/مستخدم جديد",
+        "add_emp": "➕ إضافة موظف جديد",
+        "add_emp_modal_title": "👤 إضافة موظف جديد",
         "fullname": "الاسم الكامل",
         "emp_added": "تمت إضافة الموظف بنجاح!",
         "user_exists": "اسم المستخدم موجود بالفعل!",
@@ -347,7 +374,7 @@ translations = {
         "exp_err": "يرجى إدخال المبلغ والبيان بشكل صحيح.",
         "delete_pkg": "حذف باقة",
         "pkg_deleted": "تم حذف الباقة بنجاح!",
-        "save_user_changes": "حفظ التعديلات",
+        "save_user_changes": "حفظ التعديلات 💾",
         "user_updated": "تم تحديث بيانات الموظف والمرتب بنجاح!",
         "user_deleted": "تم حذف الموظف بنجاح!",
         "total_exp": "إجمالي المصروفات (الخارج)",
@@ -360,7 +387,32 @@ translations = {
         "no_pkg_assigned": "العميل غير مشترك في باقة حالياً.",
         "completion_rate": "نسبة إنجاز الخدمات:",
         "delete_client": "حذف عميل (المالك فقط)",
-        "client_deleted": "تم حذف العميل بنجاح!"
+        "client_deleted": "تم حذف العميل بنجاح!",
+        "emp_team_head": "📋 فريق العمل الحالي",
+        "no_employees_msg": "لم يتم العثور على موظفين مطابقتين للبحث.",
+        "job_title": "الوظيفة",
+        "salary_txt": "المرتب الشهري",
+        "actions_btn": "⚙️ خيارات / تعديل / حذف",
+        "edit_emp_modal": "إعدادات حساب:",
+        "new_pass_optional": "كلمة سر جديدة (اتركها فارغة بدون تغيير)",
+        "del_emp_permanently": "🗑️ حذف الموظف نهائياً",
+        "cannot_del_self": "لا يمكنك حذف حسابك الحالي الذي تستخدمه الآن.",
+        "task_overview": "📈 لوحة متابعة إنجاز الموظفين وتوقيت الانتهاء",
+        "no_tasks_msg": "لا توجد مهام مسجلة ومحولة للموظفين حتى الآن.",
+        "total_tasks": "إجمالي المهام المحولة",
+        "completed_tasks": "المهام المكتملة ✅",
+        "pending_tasks": "المهام قيد التنفيذ ⏳",
+        "tasks_for_role": "📌 المهام الموجهة لوظيفة:",
+        "col_task_id": "رقم المهمة",
+        "col_client": "العميل",
+        "col_desc": "تفاصيل المهمة المطلوب تنفيذها",
+        "col_status": "حالة المهمة",
+        "col_created": "تاريخ الإنشاء",
+        "col_completed": "تاريخ وتوقيت الإنجاز ⏱️",
+        "tab_emp_mgmt": "👤 إدارة الموظفين والمرتبات (مبسطة)",
+        "tab_emp_tasks": "📊 متابعة إنجاز مهام الموظفين والتوقيت",
+        "search_emp_placeholder": "🔍 ابحث عن موظف بالاسم، الرقم التعريفى (ID)، اليوزر، أو الوظيفة...",
+        "emp_id_label": "الرقم التعريفي"
     }
 }
 
@@ -392,7 +444,8 @@ if not st.session_state.logged_in:
         
         col_lang, col_theme = st.columns(2)
         with col_lang:
-            selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], horizontal=True)
+            selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
+                                     index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
             st.session_state.lang = "EN" if selected_lang == "English" else "AR"
             t = translations[st.session_state.lang]
         with col_theme:
@@ -477,94 +530,112 @@ else:
         else:
             tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks", conn)
 
-        pending_tasks = tasks_df[tasks_df["status"] == "قيد التنفيذ"] if not tasks_df.empty else pd.DataFrame()
-        completed_tasks = tasks_df[tasks_df["status"] == "مكتمل ✅"] if not tasks_df.empty else pd.DataFrame()
+        pending_tasks = tasks_df[tasks_df["status"].isin(["Pending", "قيد التنفيذ"])] if not tasks_df.empty else pd.DataFrame()
+        completed_tasks = tasks_df[tasks_df["status"].isin(["Completed ✅", "مكتمل ✅"])] if not tasks_df.empty else pd.DataFrame()
 
-        tab1, tab2 = st.tabs(["⏳ مهام قيد التنفيذ", "✅ مهام تم إنجازها"])
+        tab1, tab2 = st.tabs(["⏳ Pending Tasks" if st.session_state.lang == "EN" else "⏳ مهام قيد التنفيذ", 
+                              "✅ Completed Tasks" if st.session_state.lang == "EN" else "✅ مهام تم إنجازها"])
 
         with tab1:
             if pending_tasks.empty:
-                st.info("لا توجد مهام معلقة مطلوب تنفيذها حالياً! 🎉")
+                st.info("No pending tasks assigned right now! 🎉" if st.session_state.lang == "EN" else "لا توجد مهام معلقة مطلوب تنفيذها حالياً! 🎉")
             else:
                 for idx, row in pending_tasks.iterrows():
-                    with st.expander(f"📌 عميل: {row['client_name']} - {row['task_description']}"):
-                        st.write(f"**المطلوب:** {row['task_description']}")
-                        st.write(f"**الموجه لـ:** {row['assigned_role']}")
-                        st.write(f"**تاريخ الإضافة:** {row['created_at']}")
+                    with st.expander(f"📌 Client: {row['client_name']} - {row['task_description']}"):
+                        st.write(f"**Task:** {row['task_description']}")
+                        st.write(f"**Target Role:** {row['assigned_role']}")
+                        st.write(f"**Created At:** {row['created_at']}")
                         
-                        if st.button("تحديد كـ مكتمل ✅", key=f"task_done_{row['id']}"):
-                            c.execute("UPDATE assigned_tasks SET status = 'مكتمل ✅', completed_at = ? WHERE id = ?",
+                        done_label = "Mark as Done ✅" if st.session_state.lang == "EN" else "تحديد كـ مكتمل ✅"
+                        if st.button(done_label, key=f"task_done_{row['id']}"):
+                            c.execute("UPDATE assigned_tasks SET status = 'Completed ✅', completed_at = ? WHERE id = ?",
                                       (datetime.now().strftime("%Y-%m-%d %H:%M"), row['id']))
                             conn.commit()
-                            st.success("تم تحديث حالة التاسك وإنجازه بنجاح! 🚀")
+                            st.success("Task status updated successfully! 🚀" if st.session_state.lang == "EN" else "تم تحديث حالة التاسك وإنجازه بنجاح! 🚀")
                             st.rerun()
 
         with tab2:
             if completed_tasks.empty:
-                st.caption("لم يتم إنجاز مهام بعد.")
+                st.caption("No completed tasks yet." if st.session_state.lang == "EN" else "لم يتم إنجاز مهام بعد.")
             else:
                 st.dataframe(completed_tasks[["client_name", "assigned_role", "task_description", "completed_at"]], use_container_width=True)
                 
         conn.close()
 
-    # --- 3. Simplified Modern Employee Hub & Task Tracking ---
+    # --- 3. Simplified Modern Employee Hub with Search & Employee ID ---
     elif choice == t.get("employees") and role in ["Owner", "Manager"]:
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
         c = conn.cursor()
         
         tab_emp_mgmt, tab_emp_tasks = st.tabs([
-            "👤 إدارة الموظفين والمرتبات (مبسطة)", 
-            "📊 متابعة إنجاز مهام الموظفين والتوقيت"
+            t["tab_emp_mgmt"], 
+            t["tab_emp_tasks"]
         ])
 
-        # --- Tab A: الموظفين بتصميم مبسط وكروت زرار + وتعديل سريع ---
+        # --- Tab A: Employee Management Cards & Live Search ---
         with tab_emp_mgmt:
-            # الشريط العلوي للتنفيذ السريع
+            # الشريط العلوي مع زر الإضافة
             col_head1, col_head2 = st.columns([3, 1])
             with col_head1:
-                st.subheader("📋 فريق العمل الحالى")
+                st.subheader(t["emp_team_head"])
             with col_head2:
-                # زر الزائد السريع + لإضافة موظف
-                with st.popover("➕ إضافة موظف جديد", use_container_width=True):
-                    st.markdown("### 👤 إضافة موظف جديد")
+                with st.popover(t["add_emp"], use_container_width=True):
+                    st.markdown(f"### {t['add_emp_modal_title']}")
                     with st.form("quick_add_emp"):
-                        u_fullname = st.text_input("الاسم الكامل")
-                        u_username = st.text_input("اسم المستخدم (Username)")
-                        u_password = st.text_input("كلمة المرور", type="password")
-                        u_role_preset = st.selectbox("الوظيفة", ["Owner", "Manager", "Editor", "Social Media Specialist", "أخرى / Custom"])
+                        u_fullname = st.text_input(t["fullname"])
+                        u_username = st.text_input(t["username"])
+                        u_password = st.text_input(t["password"], type="password")
+                        u_role_preset = st.selectbox(t["role"], ["Owner", "Manager", "Editor", "Social Media Specialist", "Other / Custom"])
                         
-                        if u_role_preset == "أخرى / Custom":
-                            u_role_custom = st.text_input("اكتب الوظيفة المخصصة:")
+                        if "Custom" in u_role_preset or "أخرى" in u_role_preset:
+                            u_role_custom = st.text_input("Custom Role Title / الوظيفة المخصصة:")
                             final_role = u_role_custom.strip() if u_role_custom.strip() != "" else "Employee"
                         else:
                             final_role = u_role_preset
                             
-                        u_salary = st.number_input("المرتب الشهري (EGP)", min_value=0.0, step=500.0)
+                        u_salary = st.number_input(f"{t['salary_txt']} (EGP)", min_value=0.0, step=500.0)
 
-                        if st.form_submit_button("حفظ الموظف 🚀", use_container_width=True):
+                        if st.form_submit_button(f"{t['save']} 🚀", use_container_width=True):
                             if u_fullname and u_username and u_password:
                                 try:
                                     c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
                                               (u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
                                     conn.commit()
-                                    st.success("تمت إضافة الموظف بنجاح!")
+                                    st.success(t["emp_added"])
                                     st.rerun()
                                 except sqlite3.IntegrityError:
-                                    st.error("اسم المستخدم موجود بالفعل!")
+                                    st.error(t["user_exists"])
                             else:
-                                st.error("يرجى ملء جميع البيانات.")
+                                st.error("Please fill in all fields." if st.session_state.lang == "EN" else "يرجى ملء جميع البيانات.")
 
-            # جلب وتنسيق قائمة الموظفين
-            users_list = c.execute("SELECT id, name, username, role, salary FROM users").fetchall()
+            # 1. Search Bar Interface
+            search_query = st.text_input("", placeholder=t["search_emp_placeholder"])
 
-            if not users_list:
-                st.info("لا يوجد موظفين مسجلين حالياً. اضغط على زر (+ إضافة موظف) بالأعلى.")
+            # 2. Query All Users
+            all_users = c.execute("SELECT id, name, username, role, salary FROM users").fetchall()
+
+            # 3. Filter Users Based on Search Input
+            if search_query.strip() != "":
+                q = search_query.strip().lower()
+                filtered_users = [
+                    u for u in all_users 
+                    if q in str(u[0]).lower()             # ID search
+                    or q in u[1].lower()                  # Name search
+                    or q in u[2].lower()                  # Username search
+                    or q in u[3].lower()                  # Role search
+                ]
             else:
-                # عرض الموظفين في شكل كروت تفاعلية أنيقة (Grid)
+                filtered_users = all_users
+
+            st.divider()
+
+            if not filtered_users:
+                st.info(t["no_employees_msg"])
+            else:
                 cols_per_row = 2
-                for i in range(0, len(users_list), cols_per_row):
-                    row_users = users_list[i:i+cols_per_row]
+                for i in range(0, len(filtered_users), cols_per_row):
+                    row_users = filtered_users[i:i+cols_per_row]
                     cols = st.columns(cols_per_row)
                     
                     for idx, user_data in enumerate(row_users):
@@ -572,24 +643,29 @@ else:
                         
                         with cols[idx]:
                             with st.container(border=True):
-                                st.markdown(f"### 👤 {u_name}")
-                                st.markdown(f"💼 **الوظيفة:** `{u_role}`")
-                                st.markdown(f"💰 **المرتب:** `{u_sal:,.2f} EGP`")
-                                st.caption(f"🔑 اليوزر نيم: {u_uname}")
-
-                                # نافذة التعديل والحذف المباشرة المفتوحة من الكارت
-                                with st.popover("⚙️ خيارات / تعديل / حذف", use_container_width=True):
-                                    st.markdown(f"#### إعدادات حساب: {u_name}")
+                                # Display ID tag alongside Name
+                                col_card_title, col_card_id = st.columns([3, 1])
+                                with col_card_title:
+                                    st.markdown(f"### 👤 {u_name}")
+                                with col_card_id:
+                                    st.markdown(f"**`#{u_id}`**")
                                     
-                                    # Form التعديل
-                                    with st.form(f"edit_form_{u_id}"):
-                                        e_fullname = st.text_input("الاسم", value=u_name)
-                                        e_username = st.text_input("اليوزر نيم", value=u_uname)
-                                        e_role = st.text_input("الوظيفة", value=u_role)
-                                        e_salary = st.number_input("المرتب (EGP)", value=float(u_sal if u_sal else 0.0), step=500.0)
-                                        e_password = st.text_input("كلمة سر جديدة (اتركها فارغة بدون تغيير)", type="password")
+                                st.markdown(f"💼 **{t['job_title']}:** `{u_role}`")
+                                st.markdown(f"💰 **{t['salary_txt']}:** `{u_sal:,.2f} EGP`")
+                                st.caption(f"🔑 {t['username']}: {u_uname} | 🆔 {t['emp_id_label']}: #{u_id}")
 
-                                        if st.form_submit_button("حفظ التعديلات 💾", use_container_width=True):
+                                # Action Popover for each Employee Card
+                                with st.popover(t["actions_btn"], use_container_width=True):
+                                    st.markdown(f"#### {t['edit_emp_modal']} {u_name} (ID: #{u_id})")
+                                    
+                                    with st.form(f"edit_form_{u_id}"):
+                                        e_fullname = st.text_input(t["fullname"], value=u_name)
+                                        e_username = st.text_input(t["username"], value=u_uname)
+                                        e_role = st.text_input(t["job_title"], value=u_role)
+                                        e_salary = st.number_input(f"{t['salary_txt']} (EGP)", value=float(u_sal if u_sal else 0.0), step=500.0)
+                                        e_password = st.text_input(t["new_pass_optional"], type="password")
+
+                                        if st.form_submit_button(t["save_user_changes"], use_container_width=True):
                                             try:
                                                 if e_password.strip() != "":
                                                     c.execute("UPDATE users SET username = ?, name = ?, role = ?, salary = ?, password = ? WHERE id = ?", 
@@ -598,55 +674,54 @@ else:
                                                     c.execute("UPDATE users SET username = ?, name = ?, role = ?, salary = ? WHERE id = ?", 
                                                               (e_username, e_fullname, e_role, e_salary, u_id))
                                                 conn.commit()
-                                                st.success("تم التعديل بنجاح!")
+                                                st.success(t["user_updated"])
                                                 st.rerun()
                                             except sqlite3.IntegrityError:
-                                                st.error("اسم المستخدم مكرر!")
+                                                st.error(t["user_exists"])
 
                                     st.divider()
-                                    # زر الحذف الفوري المباشر
                                     if u_uname != st.session_state.user_info["username"]:
-                                        if st.button("🗑️ حذف الموظف نهائياً", key=f"del_{u_id}", type="primary", use_container_width=True):
+                                        if st.button(t["del_emp_permanently"], key=f"del_{u_id}", type="primary", use_container_width=True):
                                             c.execute("DELETE FROM users WHERE id = ?", (u_id,))
                                             conn.commit()
-                                            st.success("تم مسح الموظف بنجاح!")
+                                            st.success(t["user_deleted"])
                                             st.rerun()
                                     else:
-                                        st.caption("لا يمكنك حذف حسابك الحالي الذي تستخدمه الآن.")
+                                        st.caption(t["cannot_del_self"])
 
-        # --- Tab B: متابعة المهام والتوقيت ---
+        # --- Tab B: Tasks & Timeline Dashboard ---
         with tab_emp_tasks:
-            st.subheader("📈 لوحة متابعة إنجاز الموظفين وتوقيت الانتهاء")
+            st.subheader(t["task_overview"])
             
             tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks", conn)
             
             if tasks_df.empty:
-                st.info("لا توجد مهام مسجلة ومحولة للموظفين حتى الآن.")
+                st.info(t["no_tasks_msg"])
             else:
                 col_m1, col_m2, col_m3 = st.columns(3)
                 tot = len(tasks_df)
-                dn = len(tasks_df[tasks_df["status"] == "مكتمل ✅"])
+                dn = len(tasks_df[tasks_df["status"].isin(["Completed ✅", "مكتمل ✅"])])
                 pn = tot - dn
 
-                col_m1.metric("إجمالي المهام المحولة", tot)
-                col_m2.metric("المهام المكتملة ✅", dn)
-                col_m3.metric("المهام قيد التنفيذ ⏳", pn)
+                col_m1.metric(t["total_tasks"], tot)
+                col_m2.metric(t["completed_tasks"], dn)
+                col_m3.metric(t["pending_tasks"], pn)
 
                 st.divider()
                 
                 roles_in_tasks = tasks_df["assigned_role"].unique()
                 for r in roles_in_tasks:
-                    with st.expander(f"📌 المهام الموجهة لوظيفة: **{r}**", expanded=True):
+                    with st.expander(f"{t['tasks_for_role']} **{r}**", expanded=True):
                         sub_df = tasks_df[tasks_df["assigned_role"] == r]
                         st.dataframe(
                             sub_df[["id", "client_name", "task_description", "status", "created_at", "completed_at"]].rename(
                                 columns={
-                                    "id": "رقم المهمة",
-                                    "client_name": "العميل",
-                                    "task_description": "تفاصيل المهمة المطلوب تنفيذها",
-                                    "status": "حالة المهمة",
-                                    "created_at": "تاريخ الإنشاء",
-                                    "completed_at": "تاريخ وتوقيت الإنجاز ⏱️"
+                                    "id": t["col_task_id"],
+                                    "client_name": t["col_client"],
+                                    "task_description": t["col_desc"],
+                                    "status": t["col_status"],
+                                    "created_at": t["col_created"],
+                                    "completed_at": t["col_completed"]
                                 }
                             ), 
                             use_container_width=True
@@ -685,15 +760,12 @@ else:
                         current_date_str = datetime.now().strftime("%Y-%m-%d")
                         now_full_str = datetime.now().strftime("%Y-%m-%d %H:%M")
                         
-                        # 1. Insert Client Record
                         c.execute("INSERT INTO clients (client_name, phone, package_id, notes, tasks_status, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                                   (c_name, c_phone, pkg_id, c_notes, json.dumps(initial_tasks, ensure_ascii=False), current_date_str))
                         
-                        # 2. Insert Income Record automatically
                         c.execute("INSERT INTO incomes (client_name, package_name, amount, added_by) VALUES (?, ?, ?, ?)",
                                   (c_name, pkg_name, pkg_price, st.session_state.user_info["name"]))
                         
-                        # 3. Generate Tasks for Employees
                         if editor_t and editor_t.strip() != "":
                             c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)",
                                       (c_name, "Editor", editor_t, now_full_str))
@@ -729,32 +801,31 @@ else:
                         end_date = start_date + timedelta(days=pkg_days)
                         remaining = (end_date - today).days
                         if remaining > 0:
-                            days_left_list.append(f"{remaining} يوم")
-                            status_list.append("نشط 🟢")
+                            days_left_list.append(f"{remaining} Days" if st.session_state.lang == "EN" else f"{remaining} يوم")
+                            status_list.append("Active 🟢" if st.session_state.lang == "EN" else "نشط 🟢")
                         else:
-                            days_left_list.append("0 يوم")
-                            status_list.append("منتهي 🔴")
+                            days_left_list.append("0 Days" if st.session_state.lang == "EN" else "0 يوم")
+                            status_list.append("Expired 🔴" if st.session_state.lang == "EN" else "منتهي 🔴")
                     except Exception:
-                        days_left_list.append("غير محدد")
-                        status_list.append("نشط 🟢")
+                        days_left_list.append("N/A")
+                        status_list.append("Active 🟢" if st.session_state.lang == "EN" else "نشط 🟢")
                 else:
-                    days_left_list.append("غير محدد")
-                    status_list.append("نشط 🟢")
+                    days_left_list.append("N/A")
+                    status_list.append("Active 🟢" if st.session_state.lang == "EN" else "نشط 🟢")
             
-            df_clients['المتبقي من الباقة'] = days_left_list
-            df_clients['حالة الاشتراك'] = status_list
+            df_clients['Days Remaining' if st.session_state.lang == "EN" else 'المتبقي من الباقة'] = days_left_list
+            df_clients['Subscription Status' if st.session_state.lang == "EN" else 'حالة الاشتراك'] = status_list
 
         st.subheader(f"📋 {t['clients_list']}")
         st.dataframe(df_clients, use_container_width=True)
         
-        # Delete Client (Owner Only)
         if role == "Owner" and not df_clients.empty:
             st.divider()
             st.subheader(f"🗑️ {t['delete_client']}")
             client_options = {f"{row['id']} - {row['client_name']}": row['id'] for _, row in df_clients.iterrows()}
-            selected_client_del = st.selectbox("اختر العميل المراد حذفه نهائياً:", list(client_options.keys()))
+            selected_client_del = st.selectbox("Select Client to Delete:" if st.session_state.lang == "EN" else "اختر العميل المراد حذفه نهائياً:", list(client_options.keys()))
             
-            if st.button("حذف العميل المحدد ❌", type="primary"):
+            if st.button("Delete Selected Client ❌" if st.session_state.lang == "EN" else "حذف العميل المحدد ❌", type="primary"):
                 client_id_to_del = client_options[selected_client_del]
                 c.execute("DELETE FROM clients WHERE id = ?", (client_id_to_del,))
                 conn.commit()
@@ -839,7 +910,7 @@ else:
         with st.form("add_expense_form"):
             e_title = st.text_input(t["exp_title"])
             e_amount = st.number_input(t["amount"], min_value=0.0)
-            e_cat = st.selectbox(t["category"], ["Operational / تشغيلي", "Salaries / رواتب", "Equipment / معدات", "Marketing / تسويق", "Other / أخرى"])
+            e_cat = st.selectbox(t["category"], ["Operational", "Salaries", "Equipment", "Marketing", "Other"])
             
             if st.form_submit_button(t["log_exp_btn"]):
                 if e_title and e_amount > 0:
@@ -911,12 +982,12 @@ else:
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df_summary = pd.DataFrame({
-                'البيان' if st.session_state.lang == "AR" else 'Item': ['إجمالي الإيرادات (الداخل)', 'إجمالي المصروفات (الخارج)', 'صافي الأرباح'] if st.session_state.lang == "AR" else ['Total Revenue (Incomes)', 'Total Expenses (Outcomes)', 'Net Profit'],
-                'المبلغ (EGP)': [total_incomes, total_outcomes, net_profit]
+                'Item' if st.session_state.lang == "EN" else 'البيان': ['Total Revenue', 'Total Expenses', 'Net Profit'] if st.session_state.lang == "EN" else ['إجمالي الإيرادات (الداخل)', 'إجمالي المصروفات (الخارج)', 'صافي الأرباح'],
+                'Amount (EGP)': [total_incomes, total_outcomes, net_profit]
             })
-            df_summary.to_excel(writer, index=False, sheet_name='الملخص المالي' if st.session_state.lang == "AR" else 'Financial Summary')
-            df_inc.to_excel(writer, index=False, sheet_name='الإيرادات (الداخل)' if st.session_state.lang == "AR" else 'Incomes')
-            df_exp.to_excel(writer, index=False, sheet_name='المصروفات (الخارج)' if st.session_state.lang == "AR" else 'Expenses')
+            df_summary.to_excel(writer, index=False, sheet_name='Summary')
+            df_inc.to_excel(writer, index=False, sheet_name='Incomes')
+            df_exp.to_excel(writer, index=False, sheet_name='Expenses')
             
         excel_data = output.getvalue()
         
@@ -928,22 +999,22 @@ else:
             use_container_width=True
         )
         
-        tab_inc, tab_exp = st.tabs(["🟢 الإيرادات (الداخل للشركة)" if st.session_state.lang == "AR" else "🟢 Revenue (Incomes)", 
-                                    "🔴 المصروفات (الخارج من الشركة)" if st.session_state.lang == "AR" else "🔴 Expenses (Outcomes)"])
+        tab_inc, tab_exp = st.tabs(["🟢 Revenue (Incomes)" if st.session_state.lang == "EN" else "🟢 الإيرادات (الداخل للشركة)", 
+                                    "🔴 Expenses (Outcomes)" if st.session_state.lang == "EN" else "🔴 المصروفات (الخارج من الشركة)"])
         
         with tab_inc:
-            st.subheader("📋 قائمة اشتراكات العملاء والإيرادات" if st.session_state.lang == "AR" else "📋 Client Subscriptions & Revenue List")
+            st.subheader("📋 Client Subscriptions & Revenue List" if st.session_state.lang == "EN" else "📋 قائمة اشتراكات العملاء والإيرادات")
             st.dataframe(df_inc, use_container_width=True)
             
         with tab_exp:
-            st.subheader("📋 قائمة المصروفات التشغيلية" if st.session_state.lang == "AR" else "📋 Operational Expenses List")
+            st.subheader("📋 Operational Expenses List" if st.session_state.lang == "EN" else "📋 قائمة المصروفات التشغيلية")
             st.dataframe(df_exp, use_container_width=True)
             
             if not df_exp.empty:
                 st.divider()
                 st.subheader(f"🗑️ {t['delete_exp']}")
-                exp_to_delete = st.selectbox("اختر رقم المصروف لمسحه:" if st.session_state.lang == "AR" else "Select expense ID to delete:", df_exp["id"].tolist())
-                if st.button("مسح المصروف المحدد" if st.session_state.lang == "AR" else "Delete Selected Expense"):
+                exp_to_delete = st.selectbox("Select Expense ID to delete:" if st.session_state.lang == "EN" else "اختر رقم المصروف لمسحه:", df_exp["id"].tolist())
+                if st.button("Delete Selected Expense" if st.session_state.lang == "EN" else "مسح المصروف المحدد"):
                     c.execute("DELETE FROM expenses WHERE id = ?", (exp_to_delete,))
                     conn.commit()
                     st.success(t["exp_deleted"])
