@@ -254,9 +254,9 @@ translations = {
         "add_emp": "Add New User",
         "fullname": "Full Name",
         "emp_added": "User added successfully!",
-        "user_exists": "Username or ID already exists!",
-        "delete": "Delete",
-        "edit": "Edit User Details, Salary & Password",
+        "user_exists": "Username already exists!",
+        "delete": "Delete User",
+        "edit": "Edit Details & Salary",
         "add_client": "Add New Client",
         "client_name": "Client Name",
         "phone": "Phone Number",
@@ -277,14 +277,8 @@ translations = {
         "exp_err": "Please enter valid title and amount.",
         "delete_pkg": "Delete Package",
         "pkg_deleted": "Package deleted successfully!",
-        "select_user_edit": "Select user to edit",
-        "edit_id": "Edit User ID",
-        "new_username": "New Username",
-        "new_role": "New Role / Title",
-        "new_pw": "New Password (Leave blank to keep unchanged)",
         "save_user_changes": "Save User Changes",
-        "user_updated": "User details and password updated successfully!",
-        "delete_user": "Delete User",
+        "user_updated": "User details updated successfully!",
         "user_deleted": "User deleted successfully!",
         "total_exp": "Total Expenses (Outcomes)",
         "total_inc": "Total Revenue (Incomes)",
@@ -314,7 +308,7 @@ translations = {
         "cs": "إدارة العملاء ومتابعة الخدمات",
         "expenses": "تسجيل مصروف",
         "packages": "إدارة الباقات",
-        "employees": "مركز الموظفين وإنجاز المهام",
+        "employees": "الموظفين والمرتبات ومتابعة المهام",
         "audit": "شيت الحسابات والتدقيق المالي (المالك فقط)",
         "logout": "تسجيل الخروج",
         "status": "حالة النظام",
@@ -330,9 +324,9 @@ translations = {
         "add_emp": "إضافة موظف/مستخدم جديد",
         "fullname": "الاسم الكامل",
         "emp_added": "تمت إضافة الموظف بنجاح!",
-        "user_exists": "اسم المستخدم أو ID موجود بالفعل!",
-        "delete": "حذف",
-        "edit": "تعديل البيانات، المرتب، الـ ID وكلمة المرور",
+        "user_exists": "اسم المستخدم موجود بالفعل!",
+        "delete": "حذف حساب الموظف",
+        "edit": "تعديل البيانات والمرتب",
         "add_client": "إضافة عميل جديد",
         "client_name": "اسم العميل",
         "phone": "رقم الهاتف",
@@ -353,14 +347,8 @@ translations = {
         "exp_err": "يرجى إدخال المبلغ والبيان بشكل صحيح.",
         "delete_pkg": "حذف باقة",
         "pkg_deleted": "تم حذف الباقة بنجاح!",
-        "select_user_edit": "اختر الموظف للتعديل",
-        "edit_id": "تعديل رقم الـ ID",
-        "new_username": "اسم المستخدم الجديد",
-        "new_role": "الوظيفة / الرتبة الجديدة",
-        "new_pw": "كلمة المرور الجديدة (اتركها فارغة إذا لا تريد التغيير)",
-        "save_user_changes": "حفظ جميع التعديلات",
-        "user_updated": "تم تحديث بيانات الموظف والمرتب والرقم السري بنجاح!",
-        "delete_user": "حذف موظف",
+        "save_user_changes": "حفظ التعديلات",
+        "user_updated": "تم تحديث بيانات الموظف والمرتب بنجاح!",
         "user_deleted": "تم حذف الموظف بنجاح!",
         "total_exp": "إجمالي المصروفات (الخارج)",
         "total_inc": "إجمالي الإيرادات (الداخل)",
@@ -519,106 +507,114 @@ else:
                 
         conn.close()
 
-    # --- 3. Unified Employee Hub & Task Tracking Page (إدارة الموظفين والمهام والمرتبات) ---
+    # --- 3. Simplified Modern Employee Hub & Task Tracking ---
     elif choice == t.get("employees") and role in ["Owner", "Manager"]:
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
         c = conn.cursor()
         
         tab_emp_mgmt, tab_emp_tasks = st.tabs([
-            "👤 إدارة الموظفين والحسابات والمرتبات", 
+            "👤 إدارة الموظفين والمرتبات (مبسطة)", 
             "📊 متابعة إنجاز مهام الموظفين والتوقيت"
         ])
 
-        # --- Tab A: الموظفين المرتبات والتعديل الحذف ---
+        # --- Tab A: الموظفين بتصميم مبسط وكروت زرار + وتعديل سريع ---
         with tab_emp_mgmt:
-            # 1. إضافة موظف جديد
-            with st.expander(f"➕ {t['add_emp']}"):
-                with st.form("add_user_form_unified"):
-                    col_a1, col_a2 = st.columns(2)
-                    with col_a1:
-                        u_fullname = st.text_input(t["fullname"])
-                        u_username = st.text_input(t["username"])
-                        u_password = st.text_input(t["password"], type="password")
-                    with col_a2:
-                        u_role_preset = st.selectbox("اختر الوظيفة أو اختر 'أخرى' لكتابة وظيفة جديدة", 
-                                                    ["Owner", "Manager", "Editor", "Social Media Specialist", "أخرى / Custom"])
+            # الشريط العلوي للتنفيذ السريع
+            col_head1, col_head2 = st.columns([3, 1])
+            with col_head1:
+                st.subheader("📋 فريق العمل الحالى")
+            with col_head2:
+                # زر الزائد السريع + لإضافة موظف
+                with st.popover("➕ إضافة موظف جديد", use_container_width=True):
+                    st.markdown("### 👤 إضافة موظف جديد")
+                    with st.form("quick_add_emp"):
+                        u_fullname = st.text_input("الاسم الكامل")
+                        u_username = st.text_input("اسم المستخدم (Username)")
+                        u_password = st.text_input("كلمة المرور", type="password")
+                        u_role_preset = st.selectbox("الوظيفة", ["Owner", "Manager", "Editor", "Social Media Specialist", "أخرى / Custom"])
                         
                         if u_role_preset == "أخرى / Custom":
-                            u_role_custom = st.text_input("اكتب الوظيفة المخصصة (مثال: Voice Over, Content Writer):")
+                            u_role_custom = st.text_input("اكتب الوظيفة المخصصة:")
                             final_role = u_role_custom.strip() if u_role_custom.strip() != "" else "Employee"
                         else:
                             final_role = u_role_preset
                             
-                        u_salary = st.number_input("المرتب الشهرى (EGP)", min_value=0.0, step=500.0)
+                        u_salary = st.number_input("المرتب الشهري (EGP)", min_value=0.0, step=500.0)
 
-                    if st.form_submit_button("إضافة الموظف للنظام 🚀", use_container_width=True):
-                        if u_fullname and u_username and u_password:
-                            try:
-                                c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
-                                          (u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
-                                conn.commit()
-                                st.success(t["emp_added"])
-                                st.rerun()
-                            except sqlite3.IntegrityError:
-                                st.error(t["user_exists"])
-                        else:
-                            st.error("يرجى ملء جميع البيانات المطلوبة.")
-
-            # 2. عرض جدول الموظفين والمرتبات
-            st.subheader("📋 قائمة الموظفين والحسابات المسجلة")
-            df_users = pd.read_sql_query("SELECT id, name as 'الاسم الكامل', username as 'اسم المستخدم', role as 'الوظيفة', salary as 'المرتب (EGP)' FROM users", conn)
-            st.dataframe(df_users, use_container_width=True)
-
-            st.divider()
-            col_edit_u, col_del_u = st.columns(2)
-
-            # 3. تعديل بيانات موظف / باسوورد / مرتب
-            with col_edit_u:
-                st.subheader("✏️ " + t["edit"])
-                user_list = df_users['اسم المستخدم'].tolist()
-                selected_user = st.selectbox(t["select_user_edit"], user_list if user_list else ["N/A"])
-                
-                if user_list and selected_user != "N/A":
-                    c.execute("SELECT id, username, role, name, salary FROM users WHERE username = ?", (selected_user,))
-                    curr_u = c.fetchone()
-                    
-                    e_id = st.number_input(t["edit_id"], value=int(curr_u[0]), step=1)
-                    e_username = st.text_input(t["new_username"], value=curr_u[1])
-                    e_fullname = st.text_input(t["fullname"], value=curr_u[3])
-                    e_role = st.text_input(t["new_role"], value=curr_u[2])
-                    e_salary = st.number_input("تعديل المرتب (EGP)", value=float(curr_u[4] if curr_u[4] else 0.0), step=500.0)
-                    e_password = st.text_input(t["new_pw"], type="password")
-
-                    if st.button(t["save_user_changes"], use_container_width=True):
-                        try:
-                            if e_password.strip() != "":
-                                c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, salary = ?, password = ? WHERE username = ?", 
-                                          (e_id, e_username, e_fullname, e_role, e_salary, hash_pass(e_password), selected_user))
+                        if st.form_submit_button("حفظ الموظف 🚀", use_container_width=True):
+                            if u_fullname and u_username and u_password:
+                                try:
+                                    c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
+                                              (u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
+                                    conn.commit()
+                                    st.success("تمت إضافة الموظف بنجاح!")
+                                    st.rerun()
+                                except sqlite3.IntegrityError:
+                                    st.error("اسم المستخدم موجود بالفعل!")
                             else:
-                                c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, salary = ? WHERE username = ?", 
-                                          (e_id, e_username, e_fullname, e_role, e_salary, selected_user))
-                            conn.commit()
-                            st.success(t["user_updated"])
-                            st.rerun()
-                        except sqlite3.IntegrityError:
-                            st.error(t["user_exists"])
+                                st.error("يرجى ملء جميع البيانات.")
 
-            # 4. حذف موظف
-            with col_del_u:
-                st.subheader("🗑️ " + t["delete_user"])
-                deletable_users = [u for u in user_list if u != st.session_state.user_info["username"]]
-                if deletable_users:
-                    user_to_del = st.selectbox("اختر اسم الموظف المراد مسح حسابه نهائياً:", deletable_users)
-                    if st.button("حذف حساب الموظف ❌", type="primary", use_container_width=True):
-                        c.execute("DELETE FROM users WHERE username = ?", (user_to_del,))
-                        conn.commit()
-                        st.success(t["user_deleted"])
-                        st.rerun()
-                else:
-                    st.caption("لا يوجد حسابات موظفين أخرى قابلة للحذف.")
+            # جلب وتنسيق قائمة الموظفين
+            users_list = c.execute("SELECT id, name, username, role, salary FROM users").fetchall()
 
-        # --- Tab B: متابعة المهام والإنجاز والتاريخ ---
+            if not users_list:
+                st.info("لا يوجد موظفين مسجلين حالياً. اضغط على زر (+ إضافة موظف) بالأعلى.")
+            else:
+                # عرض الموظفين في شكل كروت تفاعلية أنيقة (Grid)
+                cols_per_row = 2
+                for i in range(0, len(users_list), cols_per_row):
+                    row_users = users_list[i:i+cols_per_row]
+                    cols = st.columns(cols_per_row)
+                    
+                    for idx, user_data in enumerate(row_users):
+                        u_id, u_name, u_uname, u_role, u_sal = user_data
+                        
+                        with cols[idx]:
+                            with st.container(border=True):
+                                st.markdown(f"### 👤 {u_name}")
+                                st.markdown(f"💼 **الوظيفة:** `{u_role}`")
+                                st.markdown(f"💰 **المرتب:** `{u_sal:,.2f} EGP`")
+                                st.caption(f"🔑 اليوزر نيم: {u_uname}")
+
+                                # نافذة التعديل والحذف المباشرة المفتوحة من الكارت
+                                with st.popover("⚙️ خيارات / تعديل / حذف", use_container_width=True):
+                                    st.markdown(f"#### إعدادات حساب: {u_name}")
+                                    
+                                    # Form التعديل
+                                    with st.form(f"edit_form_{u_id}"):
+                                        e_fullname = st.text_input("الاسم", value=u_name)
+                                        e_username = st.text_input("اليوزر نيم", value=u_uname)
+                                        e_role = st.text_input("الوظيفة", value=u_role)
+                                        e_salary = st.number_input("المرتب (EGP)", value=float(u_sal if u_sal else 0.0), step=500.0)
+                                        e_password = st.text_input("كلمة سر جديدة (اتركها فارغة بدون تغيير)", type="password")
+
+                                        if st.form_submit_button("حفظ التعديلات 💾", use_container_width=True):
+                                            try:
+                                                if e_password.strip() != "":
+                                                    c.execute("UPDATE users SET username = ?, name = ?, role = ?, salary = ?, password = ? WHERE id = ?", 
+                                                              (e_username, e_fullname, e_role, e_salary, hash_pass(e_password), u_id))
+                                                else:
+                                                    c.execute("UPDATE users SET username = ?, name = ?, role = ?, salary = ? WHERE id = ?", 
+                                                              (e_username, e_fullname, e_role, e_salary, u_id))
+                                                conn.commit()
+                                                st.success("تم التعديل بنجاح!")
+                                                st.rerun()
+                                            except sqlite3.IntegrityError:
+                                                st.error("اسم المستخدم مكرر!")
+
+                                    st.divider()
+                                    # زر الحذف الفوري المباشر
+                                    if u_uname != st.session_state.user_info["username"]:
+                                        if st.button("🗑️ حذف الموظف نهائياً", key=f"del_{u_id}", type="primary", use_container_width=True):
+                                            c.execute("DELETE FROM users WHERE id = ?", (u_id,))
+                                            conn.commit()
+                                            st.success("تم مسح الموظف بنجاح!")
+                                            st.rerun()
+                                    else:
+                                        st.caption("لا يمكنك حذف حسابك الحالي الذي تستخدمه الآن.")
+
+        # --- Tab B: متابعة المهام والتوقيت ---
         with tab_emp_tasks:
             st.subheader("📈 لوحة متابعة إنجاز الموظفين وتوقيت الانتهاء")
             
@@ -638,7 +634,6 @@ else:
 
                 st.divider()
                 
-                # تجميع المهام حسب الوظيفة / الموظف
                 roles_in_tasks = tasks_df["assigned_role"].unique()
                 for r in roles_in_tasks:
                     with st.expander(f"📌 المهام الموجهة لوظيفة: **{r}**", expanded=True):
