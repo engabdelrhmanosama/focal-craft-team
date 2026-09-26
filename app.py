@@ -46,6 +46,68 @@ def get_image_base64(image_path):
 
 logo_base64 = get_image_base64(logo_path)
 
+# Custom Styling Injection for Professional Dashboard UI
+def inject_custom_css():
+    st.markdown("""
+        <style>
+        /* Import Modern Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+        
+        html, body, [class*="css"] {
+            font-family: 'Cairo', 'Inter', sans-serif;
+        }
+
+        /* Card Container Styling */
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background: rgba(30, 41, 59, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 12px !important;
+            padding: 16px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Metric Cards Styling */
+        div[data-testid="stMetric"] {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)) !important;
+            padding: 16px !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Button Styling */
+        .stButton>button {
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.2s ease !important;
+        }
+
+        /* Primary Action Buttons */
+        .stButton>button[kind="primary"] {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            border: none !important;
+            color: white !important;
+        }
+
+        /* Tabs Styling */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+inject_custom_css()
+
 # ==========================================
 # 2. Database Connection & Schema (SQLite)
 # ==========================================
@@ -204,7 +266,7 @@ if "logged_in" not in st.session_state:
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
 if "lang" not in st.session_state:
-    st.session_state.lang = "EN"
+    st.session_state.lang = "AR"
 if "theme" not in st.session_state:
     st.session_state.theme = "Dark"
 
@@ -216,7 +278,15 @@ if st.session_state.theme == "Light":
             color: #0f172a !important;
         }
         .stSidebar {
-            background-color: #e2e8f0 !important;
+            background-color: #f1f5f9 !important;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        div[data-testid="stMetric"] {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -255,7 +325,7 @@ translations = {
         "add_emp_modal_title": "👤 Add New Employee",
         "fullname": "Full Name",
         "emp_added": "Employee added successfully!",
-        "user_exists": "Username already exists!",
+        "user_exists": "Username or ID already exists!",
         "delete": "Delete Account",
         "edit": "Edit Details & Salary",
         "add_client": "Add New Client",
@@ -293,10 +363,10 @@ translations = {
         "delete_client": "Delete Client (Owner Only)",
         "client_deleted": "Client deleted successfully!",
         "emp_team_head": "📋 Current Team Members",
-        "no_employees_msg": "No employees found.",
+        "no_employees_msg": "No employees found matching the search.",
         "job_title": "Job Title",
         "salary_txt": "Monthly Salary",
-        "actions_btn": "⚙️ Actions / Edit / Delete",
+        "actions_btn": "⚙️ Options / Edit / Delete",
         "edit_emp_modal": "Settings for account:",
         "new_pass_optional": "New Password (leave empty to keep current)",
         "del_emp_permanently": "🗑️ Delete Employee Permanently",
@@ -313,10 +383,11 @@ translations = {
         "col_status": "Status",
         "col_created": "Date Created",
         "col_completed": "Completion Date & Time ⏱️",
-        "tab_emp_mgmt": "👤 Employee Management (Simplified)",
+        "tab_emp_mgmt": "👤 Employee Management",
         "tab_emp_tasks": "📊 Task Completion & Timeline Tracking",
         "search_emp_placeholder": "🔍 Search employee by Name, ID, Username, or Role...",
-        "emp_id_label": "ID"
+        "emp_id_label": "Employee ID (Custom)",
+        "id_exists_err": "This ID is already used by another employee!"
     },
     "AR": {
         "title": "فوكال كرافت تيم",
@@ -351,7 +422,7 @@ translations = {
         "add_emp_modal_title": "👤 إضافة موظف جديد",
         "fullname": "الاسم الكامل",
         "emp_added": "تمت إضافة الموظف بنجاح!",
-        "user_exists": "اسم المستخدم موجود بالفعل!",
+        "user_exists": "اسم المستخدم أو الرقم التعريفي موجود بالفعل!",
         "delete": "حذف حساب الموظف",
         "edit": "تعديل البيانات والمرتب",
         "add_client": "إضافة عميل جديد",
@@ -389,7 +460,7 @@ translations = {
         "delete_client": "حذف عميل (المالك فقط)",
         "client_deleted": "تم حذف العميل بنجاح!",
         "emp_team_head": "📋 فريق العمل الحالي",
-        "no_employees_msg": "لم يتم العثور على موظفين مطابقتين للبحث.",
+        "no_employees_msg": "لم يتم العثور على موظفين مطابقين للبحث.",
         "job_title": "الوظيفة",
         "salary_txt": "المرتب الشهري",
         "actions_btn": "⚙️ خيارات / تعديل / حذف",
@@ -409,10 +480,11 @@ translations = {
         "col_status": "حالة المهمة",
         "col_created": "تاريخ الإنشاء",
         "col_completed": "تاريخ وتوقيت الإنجاز ⏱️",
-        "tab_emp_mgmt": "👤 إدارة الموظفين والمرتبات (مبسطة)",
+        "tab_emp_mgmt": "👤 إدارة الموظفين والمرتبات",
         "tab_emp_tasks": "📊 متابعة إنجاز مهام الموظفين والتوقيت",
-        "search_emp_placeholder": "🔍 ابحث عن موظف بالاسم، الرقم التعريفى (ID)، اليوزر، أو الوظيفة...",
-        "emp_id_label": "الرقم التعريفي"
+        "search_emp_placeholder": "🔍 ابحث عن موظف بالاسم، الرقم التعريفي (ID)، اليوزر، أو الوظيفة...",
+        "emp_id_label": "الرقم التعريفي (ID مخصص)",
+        "id_exists_err": "هذا الرقم التعريفي مستخدم بالفعل لموظف آخر!"
     }
 }
 
@@ -426,7 +498,7 @@ if not st.session_state.logged_in:
         bg_style = f"""
         <style>
         .stApp {{
-            background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
+            background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)), 
                         url('data:image/jpeg;base64,{logo_base64}');
             background-size: cover;
             background-position: center;
@@ -439,14 +511,14 @@ if not st.session_state.logged_in:
     with col2:
         if logo_img:
             st.image(logo_img, width=150)
-        st.markdown(f"<h2 style='text-align: center;'>{t['title']}</h2>", unsafe_allow_html=True)
-        st.markdown(f"<p style='text-align: center;'>{t['subtitle']}</p>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='text-align: center; font-weight: 800;'>{t['title']}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<p style='text-align: center; color: #94a3b8;'>{t['subtitle']}</p>", unsafe_allow_html=True)
         
         col_lang, col_theme = st.columns(2)
         with col_lang:
-            selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
-                                     index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
-            st.session_state.lang = "EN" if selected_lang == "English" else "AR"
+            selected_lang = st.radio("🌐 Language / اللغة", ["العربية", "English"], 
+                                     index=0 if st.session_state.lang == "AR" else 1, horizontal=True)
+            st.session_state.lang = "AR" if selected_lang == "العربية" else "EN"
             t = translations[st.session_state.lang]
         with col_theme:
             theme_choice = st.radio("☀️ Theme / المظهر", ["Dark", "Light"], horizontal=True)
@@ -455,7 +527,7 @@ if not st.session_state.logged_in:
         with st.form("login_form"):
             username = st.text_input(t["username"])
             password = st.text_input(t["password"], type="password")
-            submit = st.form_submit_button(t["login_btn"], use_container_width=True)
+            submit = st.form_submit_button(t["login_btn"], use_container_width=True, type="primary")
             
             if submit:
                 user = check_login(username, password)
@@ -474,13 +546,14 @@ else:
     with st.sidebar:
         if logo_img:
             st.image(logo_img, use_container_width=True)
-        st.title(t["title"])
+        st.markdown(f"<h3 style='margin-bottom:0;'>{t['title']}</h3>", unsafe_allow_html=True)
+        st.caption(f"✨ {t['subtitle']}")
         st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
-        st.caption(f"{t['role']}: {st.session_state.user_info['role']}")
+        st.caption(f"{t['role']}: `{st.session_state.user_info['role']}`")
         
-        lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
-                               index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
-        st.session_state.lang = "EN" if lang_choice == "English" else "AR"
+        lang_choice = st.radio("🌐 Language / اللغة", ["العربية", "English"], 
+                               index=0 if st.session_state.lang == "AR" else 1, horizontal=True)
+        st.session_state.lang = "AR" if lang_choice == "العربية" else "EN"
         t = translations[st.session_state.lang]
         
         theme_toggle = st.radio("☀️ Theme / المظهر", ["Dark 🌙", "Light ☀️"], 
@@ -504,7 +577,7 @@ else:
         choice = st.radio(t["nav"], menu_options)
         
         st.divider()
-        if st.button(t["logout"], use_container_width=True):
+        if st.button(t["logout"], use_container_width=True, type="primary"):
             st.session_state.logged_in = False
             st.session_state.user_info = None
             st.rerun()
@@ -512,7 +585,7 @@ else:
     # --- 1. Home Page ---
     if choice == t["home"]:
         st.title(f"🎬 {t['home']}")
-        st.write(f"{t['welcome']} {st.session_state.user_info['name']}")
+        st.write(f"{t['welcome']} **{st.session_state.user_info['name']}**")
         
         col1, col2, col3 = st.columns(3)
         col1.metric(t["status"], t["active"])
@@ -547,7 +620,7 @@ else:
                         st.write(f"**Created At:** {row['created_at']}")
                         
                         done_label = "Mark as Done ✅" if st.session_state.lang == "EN" else "تحديد كـ مكتمل ✅"
-                        if st.button(done_label, key=f"task_done_{row['id']}"):
+                        if st.button(done_label, key=f"task_done_{row['id']}", type="primary"):
                             c.execute("UPDATE assigned_tasks SET status = 'Completed ✅', completed_at = ? WHERE id = ?",
                                       (datetime.now().strftime("%Y-%m-%d %H:%M"), row['id']))
                             conn.commit()
@@ -562,7 +635,7 @@ else:
                 
         conn.close()
 
-    # --- 3. Simplified Modern Employee Hub with Search & Employee ID ---
+    # --- 3. Simplified Modern Employee Hub with Custom ID & Search ---
     elif choice == t.get("employees") and role in ["Owner", "Manager"]:
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
@@ -573,9 +646,8 @@ else:
             t["tab_emp_tasks"]
         ])
 
-        # --- Tab A: Employee Management Cards & Live Search ---
+        # --- Tab A: Employee Management Cards & Custom ID ---
         with tab_emp_mgmt:
-            # الشريط العلوي مع زر الإضافة
             col_head1, col_head2 = st.columns([3, 1])
             with col_head1:
                 st.subheader(t["emp_team_head"])
@@ -583,6 +655,7 @@ else:
                 with st.popover(t["add_emp"], use_container_width=True):
                     st.markdown(f"### {t['add_emp_modal_title']}")
                     with st.form("quick_add_emp"):
+                        u_custom_id = st.number_input(f"{t['emp_id_label']} (اختياري/أتركه فارغاً تلقائي)", min_value=1, step=1, value=None)
                         u_fullname = st.text_input(t["fullname"])
                         u_username = st.text_input(t["username"])
                         u_password = st.text_input(t["password"], type="password")
@@ -596,26 +669,30 @@ else:
                             
                         u_salary = st.number_input(f"{t['salary_txt']} (EGP)", min_value=0.0, step=500.0)
 
-                        if st.form_submit_button(f"{t['save']} 🚀", use_container_width=True):
+                        if st.form_submit_button(f"{t['save']} 🚀", use_container_width=True, type="primary"):
                             if u_fullname and u_username and u_password:
                                 try:
-                                    c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
-                                              (u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
+                                    if u_custom_id:
+                                        c.execute("INSERT INTO users (id, username, password, role, name, salary) VALUES (?, ?, ?, ?, ?, ?)",
+                                                  (int(u_custom_id), u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
+                                    else:
+                                        c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
+                                                  (u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
                                     conn.commit()
                                     st.success(t["emp_added"])
                                     st.rerun()
                                 except sqlite3.IntegrityError:
                                     st.error(t["user_exists"])
                             else:
-                                st.error("Please fill in all fields." if st.session_state.lang == "EN" else "يرجى ملء جميع البيانات.")
+                                st.error("Please fill in all required fields." if st.session_state.lang == "EN" else "يرجى ملء جميع البيانات الأساسية.")
 
-            # 1. Search Bar Interface
+            # Search Bar Interface
             search_query = st.text_input("", placeholder=t["search_emp_placeholder"])
 
-            # 2. Query All Users
+            # Query All Users
             all_users = c.execute("SELECT id, name, username, role, salary FROM users").fetchall()
 
-            # 3. Filter Users Based on Search Input
+            # Filter Users Based on Search Input
             if search_query.strip() != "":
                 q = search_query.strip().lower()
                 filtered_users = [
@@ -643,36 +720,36 @@ else:
                         
                         with cols[idx]:
                             with st.container(border=True):
-                                # Display ID tag alongside Name
                                 col_card_title, col_card_id = st.columns([3, 1])
                                 with col_card_title:
                                     st.markdown(f"### 👤 {u_name}")
                                 with col_card_id:
-                                    st.markdown(f"**`#{u_id}`**")
+                                    st.markdown(f"**`ID: #{u_id}`**")
                                     
                                 st.markdown(f"💼 **{t['job_title']}:** `{u_role}`")
                                 st.markdown(f"💰 **{t['salary_txt']}:** `{u_sal:,.2f} EGP`")
-                                st.caption(f"🔑 {t['username']}: {u_uname} | 🆔 {t['emp_id_label']}: #{u_id}")
+                                st.caption(f"🔑 {t['username']}: {u_uname} | 🆔 ID: #{u_id}")
 
-                                # Action Popover for each Employee Card
+                                # Action Popover for Editing/Deleting
                                 with st.popover(t["actions_btn"], use_container_width=True):
-                                    st.markdown(f"#### {t['edit_emp_modal']} {u_name} (ID: #{u_id})")
+                                    st.markdown(f"#### {t['edit_emp_modal']} {u_name}")
                                     
                                     with st.form(f"edit_form_{u_id}"):
+                                        e_id = st.number_input(t["emp_id_label"], value=int(u_id), step=1, min_value=1)
                                         e_fullname = st.text_input(t["fullname"], value=u_name)
                                         e_username = st.text_input(t["username"], value=u_uname)
                                         e_role = st.text_input(t["job_title"], value=u_role)
                                         e_salary = st.number_input(f"{t['salary_txt']} (EGP)", value=float(u_sal if u_sal else 0.0), step=500.0)
                                         e_password = st.text_input(t["new_pass_optional"], type="password")
 
-                                        if st.form_submit_button(t["save_user_changes"], use_container_width=True):
+                                        if st.form_submit_button(t["save_user_changes"], use_container_width=True, type="primary"):
                                             try:
                                                 if e_password.strip() != "":
-                                                    c.execute("UPDATE users SET username = ?, name = ?, role = ?, salary = ?, password = ? WHERE id = ?", 
-                                                              (e_username, e_fullname, e_role, e_salary, hash_pass(e_password), u_id))
+                                                    c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, salary = ?, password = ? WHERE id = ?", 
+                                                              (e_id, e_username, e_fullname, e_role, e_salary, hash_pass(e_password), u_id))
                                                 else:
-                                                    c.execute("UPDATE users SET username = ?, name = ?, role = ?, salary = ? WHERE id = ?", 
-                                                              (e_username, e_fullname, e_role, e_salary, u_id))
+                                                    c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, salary = ? WHERE id = ?", 
+                                                              (e_id, e_username, e_fullname, e_role, e_salary, u_id))
                                                 conn.commit()
                                                 st.success(t["user_updated"])
                                                 st.rerun()
@@ -747,7 +824,7 @@ else:
                 selected_pkg_str = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["N/A"])
                 c_notes = st.text_area(t["notes"])
                 
-                if st.form_submit_button(t["save"]):
+                if st.form_submit_button(t["save"], type="primary"):
                     if c_name and pkg_options:
                         pkg_id, pkg_price, pkg_details, pkg_name, editor_t, social_t = pkg_options[selected_pkg_str]
                         
@@ -886,7 +963,7 @@ else:
                     st.progress(progress)
                     st.caption(f"{t['completion_rate']} {completed_count}/{total_tasks} ({int(progress * 100)}%)")
                     
-                    if st.button(t["save_tasks"]):
+                    if st.button(t["save_tasks"], type="primary"):
                         c.execute("UPDATE clients SET tasks_status = ? WHERE id = ?", 
                                   (json.dumps(updated_tasks, ensure_ascii=False), selected_id))
                         conn.commit()
@@ -912,7 +989,7 @@ else:
             e_amount = st.number_input(t["amount"], min_value=0.0)
             e_cat = st.selectbox(t["category"], ["Operational", "Salaries", "Equipment", "Marketing", "Other"])
             
-            if st.form_submit_button(t["log_exp_btn"]):
+            if st.form_submit_button(t["log_exp_btn"], type="primary"):
                 if e_title and e_amount > 0:
                     c.execute("INSERT INTO expenses (title, amount, category, added_by) VALUES (?, ?, ?, ?)",
                               (e_title, e_amount, e_cat, st.session_state.user_info["name"]))
@@ -938,7 +1015,7 @@ else:
                     p_editor_tasks = st.text_area(t["editor_tasks"])
                     p_social_tasks = st.text_area(t["social_tasks"])
                     
-                    if st.form_submit_button(t["save"]):
+                    if st.form_submit_button(t["save"], type="primary"):
                         c.execute("INSERT INTO packages (name, price, details, duration_days, editor_tasks, social_tasks) VALUES (?, ?, ?, ?, ?, ?)", 
                                   (p_name, p_price, p_details, int(p_duration), p_editor_tasks, p_social_tasks))
                         conn.commit()
@@ -952,7 +1029,7 @@ else:
             st.divider()
             st.subheader(f"🗑️ {t['delete_pkg']}")
             pkg_to_delete = st.selectbox("Select Package to delete", df_pkgs["name"].tolist())
-            if st.button("Delete Selected Package"):
+            if st.button("Delete Selected Package", type="primary"):
                 c.execute("DELETE FROM packages WHERE name = ?", (pkg_to_delete,))
                 conn.commit()
                 st.success(t["pkg_deleted"])
@@ -1014,7 +1091,7 @@ else:
                 st.divider()
                 st.subheader(f"🗑️ {t['delete_exp']}")
                 exp_to_delete = st.selectbox("Select Expense ID to delete:" if st.session_state.lang == "EN" else "اختر رقم المصروف لمسحه:", df_exp["id"].tolist())
-                if st.button("Delete Selected Expense" if st.session_state.lang == "EN" else "مسح المصروف المحدد"):
+                if st.button("Delete Selected Expense" if st.session_state.lang == "EN" else "مسح المصروف المحدد", type="primary"):
                     c.execute("DELETE FROM expenses WHERE id = ?", (exp_to_delete,))
                     conn.commit()
                     st.success(t["exp_deleted"])
