@@ -5,12 +5,13 @@ import hashlib
 import os
 import base64
 import json
+import re
 from datetime import datetime, timedelta
 from PIL import Image
 from io import BytesIO
 
 # ==========================================
-# 1. Page Config & Logo Setup
+# 1. Page Config & Professional Dark Theme Setup
 # ==========================================
 logo_path = None
 for name in ["logo.jpg", "logo.jpg.jpeg", "logo.png", "logo.jpeg"]:
@@ -46,63 +47,120 @@ def get_image_base64(image_path):
 
 logo_base64 = get_image_base64(logo_path)
 
-# Custom Styling Injection for Professional Dashboard UI
+# Custom Styling Injection for Ultra Professional Dark UI
 def inject_custom_css():
-    st.markdown("""
+    st.markdown(f"""
         <style>
         /* Import Modern Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
         
-        html, body, [class*="css"] {
+        html, body, [class*="css"] {{
             font-family: 'Cairo', 'Inter', sans-serif;
-        }
+            background-color: #0b0f19 !important;
+            color: #f1f5f9 !important;
+        }}
 
-        /* Card Container Styling */
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background: rgba(30, 41, 59, 0.6) !important;
+        /* Force Permanent Dark App Background */
+        .stApp {{
+            background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #0f172a 100%) !important;
+        }}
+
+        /* Sidebar Styling */
+        section[data-testid="stSidebar"] {{
+            background-color: #0f172a !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }}
+
+        /* Card Container Styling (Glassmorphism Effect) */
+        div[data-testid="stVerticalBlockBorderWrapper"] {{
+            background: rgba(17, 24, 39, 0.7) !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            border-radius: 12px !important;
-            padding: 16px !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+            border-radius: 14px !important;
+            padding: 18px !important;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
+            backdrop-filter: blur(12px) !important;
+            transition: all 0.3s ease !important;
+        }}
 
-        div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:hover {{
+            border-color: rgba(239, 68, 68, 0.4) !important;
+            box-shadow: 0 12px 35px -5px rgba(239, 68, 68, 0.15) !important;
+        }}
 
         /* Metric Cards Styling */
-        div[data-testid="stMetric"] {
+        div[data-testid="stMetric"] {{
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)) !important;
-            padding: 16px !important;
+            padding: 18px !important;
             border-radius: 12px !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        }}
+
+        div[data-testid="stMetricLabel"] {{
+            color: #94a3b8 !important;
+            font-size: 0.9rem !important;
+            font-weight: 600 !important;
+        }}
+
+        div[data-testid="stMetricValue"] {{
+            color: #f8fafc !important;
+            font-weight: 800 !important;
+        }}
 
         /* Button Styling */
-        .stButton>button {
+        .stButton>button {{
             border-radius: 8px !important;
             font-weight: 600 !important;
-            transition: all 0.2s ease !important;
-        }
+            transition: all 0.25s ease !important;
+        }}
 
         /* Primary Action Buttons */
-        .stButton>button[kind="primary"] {
+        .stButton>button[kind="primary"] {{
             background: linear-gradient(135deg, #ef4444, #dc2626) !important;
             border: none !important;
             color: white !important;
-        }
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
+        }}
+
+        .stButton>button[kind="primary"]:hover {{
+            background: linear-gradient(135deg, #f87171, #ef4444) !important;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5) !important;
+        }}
 
         /* Tabs Styling */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-        }
+        .stTabs [data-baseweb="tab-list"] {{
+            gap: 10px;
+            background-color: rgba(15, 23, 42, 0.6);
+            padding: 6px;
+            border-radius: 10px;
+        }}
 
-        .stTabs [data-baseweb="tab"] {
+        .stTabs [data-baseweb="tab"] {{
             border-radius: 8px;
-            padding: 8px 16px;
+            padding: 10px 20px;
             font-weight: 600;
-        }
+            color: #94a3b8;
+        }}
+
+        .stTabs [aria-selected="true"] {{
+            background-color: #ef4444 !important;
+            color: #ffffff !important;
+        }}
+
+        /* Input Fields Styling */
+        .stTextInput>div>div>input, .stSelectbox>div>div, .stTextArea>div>div>textarea {{
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: 8px !important;
+        }}
+
+        /* Tables & Dataframe styling */
+        .stDataFrame {{
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+        }}
         </style>
     """, unsafe_allow_html=True)
 
@@ -141,7 +199,8 @@ def get_db_connection():
             details TEXT,
             duration_days INTEGER DEFAULT 30,
             editor_tasks TEXT DEFAULT '',
-            social_tasks TEXT DEFAULT ''
+            social_tasks TEXT DEFAULT '',
+            web_tasks TEXT DEFAULT ''
         )
     ''')
     
@@ -196,43 +255,12 @@ def get_db_connection():
         )
     ''')
     
-    # Auto-Migrations
-    c.execute("PRAGMA table_info(users)")
-    user_cols = [col[1] for col in c.fetchall()]
-    if 'salary' not in user_cols:
-        try:
-            c.execute("ALTER TABLE users ADD COLUMN salary REAL DEFAULT 0.0")
-        except Exception:
-            pass
-
+    # Auto-Migrations for New Features
     c.execute("PRAGMA table_info(packages)")
     pkg_cols = [col[1] for col in c.fetchall()]
-    if 'duration_days' not in pkg_cols:
+    if 'web_tasks' not in pkg_cols:
         try:
-            c.execute("ALTER TABLE packages ADD COLUMN duration_days INTEGER DEFAULT 30")
-        except Exception:
-            pass
-    if 'editor_tasks' not in pkg_cols:
-        try:
-            c.execute("ALTER TABLE packages ADD COLUMN editor_tasks TEXT DEFAULT ''")
-        except Exception:
-            pass
-    if 'social_tasks' not in pkg_cols:
-        try:
-            c.execute("ALTER TABLE packages ADD COLUMN social_tasks TEXT DEFAULT ''")
-        except Exception:
-            pass
-
-    c.execute("PRAGMA table_info(clients)")
-    client_cols = [col[1] for col in c.fetchall()]
-    if 'tasks_status' not in client_cols:
-        try:
-            c.execute("ALTER TABLE clients ADD COLUMN tasks_status TEXT DEFAULT '{}'")
-        except Exception:
-            pass
-    if 'created_at' not in client_cols:
-        try:
-            c.execute("ALTER TABLE clients ADD COLUMN created_at TEXT")
+            c.execute("ALTER TABLE packages ADD COLUMN web_tasks TEXT DEFAULT ''")
         except Exception:
             pass
 
@@ -258,6 +286,37 @@ def check_login(username, password):
     conn.close()
     return user
 
+# Helper Function: Auto-Splitter for Multiple Tasks
+def parse_and_split_tasks(task_text, default_label="Task"):
+    """
+    Parses strings like '3 videos' or '30 posts' and generates an array of itemized tasks.
+    Example: '3 videos' -> ['Video 1', 'Video 2', 'Video 3']
+    """
+    tasks_list = []
+    if not task_text or not task_text.strip():
+        return tasks_list
+    
+    lines = [line.strip() for line in task_text.replace("\n", ",").split(",") if line.strip()]
+    
+    for line in lines:
+        # Search for digits in the text line (e.g. 3 or 30)
+        match = re.search(r'(\d+)', line)
+        if match:
+            count = int(match.group(1))
+            # Extract description without numbers (e.g. "videos", "posts", "تصميم موقع")
+            clean_desc = re.sub(r'\d+', '', line).strip()
+            if not clean_desc:
+                clean_desc = default_label
+            
+            # Limit loop to prevent unintended infinite generation (max 100 per entry)
+            count = min(count, 100)
+            for i in range(1, count + 1):
+                tasks_list.append(f"{clean_desc} #{i}")
+        else:
+            tasks_list.append(line)
+            
+    return tasks_list
+
 # ==========================================
 # 3. Session State & Multi-Language Dictionary
 # ==========================================
@@ -265,31 +324,10 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
-if "lang" not in st.session_state:
-    st.session_state.lang = "AR"
-if "theme" not in st.session_state:
-    st.session_state.theme = "Dark"
 
-if st.session_state.theme == "Light":
-    st.markdown("""
-        <style>
-        .stApp {
-            background-color: #f8fafc !important;
-            color: #0f172a !important;
-        }
-        .stSidebar {
-            background-color: #f1f5f9 !important;
-        }
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-        div[data-testid="stMetric"] {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+# Default Language Forced to English (EN)
+if "lang" not in st.session_state:
+    st.session_state.lang = "EN"
 
 translations = {
     "EN": {
@@ -318,8 +356,9 @@ translations = {
         "price": "Price",
         "pkg_duration": "Package Duration (Days)",
         "details": "General Package Details",
-        "editor_tasks": "Editor Tasks (e.g. Edit 3 videos, Design 1 thumbnail)",
-        "social_tasks": "Social Media Tasks (e.g. Write 3 posts, Schedule publishing)",
+        "editor_tasks": "Editor Tasks (e.g. 3 videos, 1 thumbnail)",
+        "social_tasks": "Social Media Tasks (e.g. 30 posts, 5 reels)",
+        "web_tasks": "Web Designer Tasks (e.g. 1 website design, 2 landing pages)",
         "save": "Save",
         "add_emp": "➕ Add New Employee",
         "add_emp_modal_title": "👤 Add New Employee",
@@ -333,7 +372,7 @@ translations = {
         "phone": "Phone Number",
         "select_package": "Select Package",
         "notes": "Notes",
-        "client_added": "Client added, income logged & employee tasks generated automatically!",
+        "client_added": "Client added, income logged & individual tasks automatically generated for team!",
         "clients_list": "Subscribed Clients List",
         "track_services": "Track Package Services & Tasks",
         "select_client_track": "Select client to view or update services:",
@@ -386,8 +425,7 @@ translations = {
         "tab_emp_mgmt": "👤 Employee Management",
         "tab_emp_tasks": "📊 Task Completion & Timeline Tracking",
         "search_emp_placeholder": "🔍 Search employee by Name, ID, Username, or Role...",
-        "emp_id_label": "Employee ID (Custom)",
-        "id_exists_err": "This ID is already used by another employee!"
+        "emp_id_label": "Employee ID (Custom)"
     },
     "AR": {
         "title": "فوكال كرافت تيم",
@@ -415,8 +453,9 @@ translations = {
         "price": "السعر",
         "pkg_duration": "مدة الباقة (بالأيام)",
         "details": "تفاصيل الباقة العامة",
-        "editor_tasks": "مهام المونتير/الإيديتور (مثل: مونتاج 3 فيديوهات وصورة)",
-        "social_tasks": "مهام مسؤول السوشيال ميديا (مثل: كتابة 3 بوستات ونشرها)",
+        "editor_tasks": "مهام المونتير (مثل: 3 فيديوهات، 1 صامب نيل)",
+        "social_tasks": "مهام مسؤول السوشيال ميديا (مثل: 30 بوست، 5 ريلز)",
+        "web_tasks": "مهام مصمم المواقع (مثل: تصميم موقع، 2 لاندينج بيج)",
         "save": "حفظ",
         "add_emp": "➕ إضافة موظف جديد",
         "add_emp_modal_title": "👤 إضافة موظف جديد",
@@ -430,7 +469,7 @@ translations = {
         "phone": "رقم الهاتف",
         "select_package": "اختر الباقة",
         "notes": "ملاحظات",
-        "client_added": "تمت إضافة العميل، إيراد الباقة، وتحويل المهام للموظفين تلقائياً!",
+        "client_added": "تمت إضافة العميل، إيراد الباقة، وتقسيم وتحويل المهام فردياً للموظفين تلقائياً!",
         "clients_list": "قائمة العملاء المشتركين",
         "track_services": "متابعة تنفيذ خدمات الباقة للعملاء",
         "select_client_track": "اختر العميل لمتابعة أو تقديم الخدمات الخاصة به:",
@@ -483,8 +522,7 @@ translations = {
         "tab_emp_mgmt": "👤 إدارة الموظفين والمرتبات",
         "tab_emp_tasks": "📊 متابعة إنجاز مهام الموظفين والتوقيت",
         "search_emp_placeholder": "🔍 ابحث عن موظف بالاسم، الرقم التعريفي (ID)، اليوزر، أو الوظيفة...",
-        "emp_id_label": "الرقم التعريفي (ID مخصص)",
-        "id_exists_err": "هذا الرقم التعريفي مستخدم بالفعل لموظف آخر!"
+        "emp_id_label": "الرقم التعريفي (ID مخصص)"
     }
 }
 
@@ -494,35 +532,18 @@ t = translations[st.session_state.lang]
 # 4. Login Interface
 # ==========================================
 if not st.session_state.logged_in:
-    if st.session_state.theme == "Dark":
-        bg_style = f"""
-        <style>
-        .stApp {{
-            background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)), 
-                        url('data:image/jpeg;base64,{logo_base64}');
-            background-size: cover;
-            background-position: center;
-        }}
-        </style>
-        """
-        st.markdown(bg_style, unsafe_allow_html=True)
-    
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if logo_img:
             st.image(logo_img, width=150)
-        st.markdown(f"<h2 style='text-align: center; font-weight: 800;'>{t['title']}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='text-align: center; font-weight: 800; color: #f8fafc;'>{t['title']}</h2>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align: center; color: #94a3b8;'>{t['subtitle']}</p>", unsafe_allow_html=True)
         
-        col_lang, col_theme = st.columns(2)
-        with col_lang:
-            selected_lang = st.radio("🌐 Language / اللغة", ["العربية", "English"], 
-                                     index=0 if st.session_state.lang == "AR" else 1, horizontal=True)
-            st.session_state.lang = "AR" if selected_lang == "العربية" else "EN"
-            t = translations[st.session_state.lang]
-        with col_theme:
-            theme_choice = st.radio("☀️ Theme / المظهر", ["Dark", "Light"], horizontal=True)
-            st.session_state.theme = theme_choice
+        # Language Switcher Only (Theme option removed)
+        selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
+                                 index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
+        st.session_state.lang = "EN" if selected_lang == "English" else "AR"
+        t = translations[st.session_state.lang]
 
         with st.form("login_form"):
             username = st.text_input(t["username"])
@@ -546,19 +567,16 @@ else:
     with st.sidebar:
         if logo_img:
             st.image(logo_img, use_container_width=True)
-        st.markdown(f"<h3 style='margin-bottom:0;'>{t['title']}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin-bottom:0; color: #f8fafc;'>{t['title']}</h3>", unsafe_allow_html=True)
         st.caption(f"✨ {t['subtitle']}")
         st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
         st.caption(f"{t['role']}: `{st.session_state.user_info['role']}`")
         
-        lang_choice = st.radio("🌐 Language / اللغة", ["العربية", "English"], 
-                               index=0 if st.session_state.lang == "AR" else 1, horizontal=True)
-        st.session_state.lang = "AR" if lang_choice == "العربية" else "EN"
+        # Language Toggle Only
+        lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
+                               index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
+        st.session_state.lang = "EN" if lang_choice == "English" else "AR"
         t = translations[st.session_state.lang]
-        
-        theme_toggle = st.radio("☀️ Theme / المظهر", ["Dark 🌙", "Light ☀️"], 
-                                index=0 if st.session_state.theme == "Dark" else 1, horizontal=True)
-        st.session_state.theme = "Dark" if "Dark" in theme_toggle else "Light"
         
         st.divider()
         
@@ -635,7 +653,7 @@ else:
                 
         conn.close()
 
-    # --- 3. Simplified Modern Employee Hub with Custom ID & Search ---
+    # --- 3. Employee Hub with Custom Roles, IDs & Tasks ---
     elif choice == t.get("employees") and role in ["Owner", "Manager"]:
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
@@ -646,7 +664,6 @@ else:
             t["tab_emp_tasks"]
         ])
 
-        # --- Tab A: Employee Management Cards & Custom ID ---
         with tab_emp_mgmt:
             col_head1, col_head2 = st.columns([3, 1])
             with col_head1:
@@ -655,11 +672,11 @@ else:
                 with st.popover(t["add_emp"], use_container_width=True):
                     st.markdown(f"### {t['add_emp_modal_title']}")
                     with st.form("quick_add_emp"):
-                        u_custom_id = st.number_input(f"{t['emp_id_label']} (اختياري/أتركه فارغاً تلقائي)", min_value=1, step=1, value=None)
+                        u_custom_id = st.number_input(f"{t['emp_id_label']} (Optional/Auto)", min_value=1, step=1, value=None)
                         u_fullname = st.text_input(t["fullname"])
                         u_username = st.text_input(t["username"])
                         u_password = st.text_input(t["password"], type="password")
-                        u_role_preset = st.selectbox(t["role"], ["Owner", "Manager", "Editor", "Social Media Specialist", "Other / Custom"])
+                        u_role_preset = st.selectbox(t["role"], ["Owner", "Manager", "Editor", "Social Media Specialist", "Web Designer", "Other / Custom"])
                         
                         if "Custom" in u_role_preset or "أخرى" in u_role_preset:
                             u_role_custom = st.text_input("Custom Role Title / الوظيفة المخصصة:")
@@ -684,23 +701,16 @@ else:
                                 except sqlite3.IntegrityError:
                                     st.error(t["user_exists"])
                             else:
-                                st.error("Please fill in all required fields." if st.session_state.lang == "EN" else "يرجى ملء جميع البيانات الأساسية.")
+                                st.error("Please fill in all required fields.")
 
-            # Search Bar Interface
             search_query = st.text_input("", placeholder=t["search_emp_placeholder"])
-
-            # Query All Users
             all_users = c.execute("SELECT id, name, username, role, salary FROM users").fetchall()
 
-            # Filter Users Based on Search Input
             if search_query.strip() != "":
                 q = search_query.strip().lower()
                 filtered_users = [
                     u for u in all_users 
-                    if q in str(u[0]).lower()             # ID search
-                    or q in u[1].lower()                  # Name search
-                    or q in u[2].lower()                  # Username search
-                    or q in u[3].lower()                  # Role search
+                    if q in str(u[0]).lower() or q in u[1].lower() or q in u[2].lower() or q in u[3].lower()
                 ]
             else:
                 filtered_users = all_users
@@ -730,7 +740,6 @@ else:
                                 st.markdown(f"💰 **{t['salary_txt']}:** `{u_sal:,.2f} EGP`")
                                 st.caption(f"🔑 {t['username']}: {u_uname} | 🆔 ID: #{u_id}")
 
-                                # Action Popover for Editing/Deleting
                                 with st.popover(t["actions_btn"], use_container_width=True):
                                     st.markdown(f"#### {t['edit_emp_modal']} {u_name}")
                                     
@@ -766,10 +775,8 @@ else:
                                     else:
                                         st.caption(t["cannot_del_self"])
 
-        # --- Tab B: Tasks & Timeline Dashboard ---
         with tab_emp_tasks:
             st.subheader(t["task_overview"])
-            
             tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks", conn)
             
             if tasks_df.empty:
@@ -806,27 +813,26 @@ else:
 
         conn.close()
 
-    # --- 4. Clients & Services Checklist Tracking ---
+    # --- 4. Clients & Services Checklist Tracking (With Intelligent Auto Task Splitter) ---
     elif choice == t["cs"]:
         st.title(f"📞 {t['cs']}")
         conn = get_db_connection()
         c = conn.cursor()
         
-        # Add Client Form
         with st.expander(f"➕ {t['add_client']}"):
             with st.form("add_client_form"):
                 c_name = st.text_input(t["client_name"])
                 c_phone = st.text_input(t["phone"])
                 
-                pkgs = pd.read_sql_query("SELECT id, name, price, details, editor_tasks, social_tasks FROM packages", conn)
-                pkg_options = {f"{row['name']} ({row['price']:,.0f} EGP)": (row['id'], row['price'], row['details'], row['name'], row['editor_tasks'], row['social_tasks']) for _, row in pkgs.iterrows()} if not pkgs.empty else {}
+                pkgs = pd.read_sql_query("SELECT id, name, price, details, editor_tasks, social_tasks, web_tasks FROM packages", conn)
+                pkg_options = {f"{row['name']} ({row['price']:,.0f} EGP)": (row['id'], row['price'], row['details'], row['name'], row['editor_tasks'], row['social_tasks'], row['web_tasks']) for _, row in pkgs.iterrows()} if not pkgs.empty else {}
                 
                 selected_pkg_str = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["N/A"])
                 c_notes = st.text_area(t["notes"])
                 
                 if st.form_submit_button(t["save"], type="primary"):
                     if c_name and pkg_options:
-                        pkg_id, pkg_price, pkg_details, pkg_name, editor_t, social_t = pkg_options[selected_pkg_str]
+                        pkg_id, pkg_price, pkg_details, pkg_name, editor_t, social_t, web_t = pkg_options[selected_pkg_str]
                         
                         initial_tasks = {}
                         if pkg_details:
@@ -843,20 +849,31 @@ else:
                         c.execute("INSERT INTO incomes (client_name, package_name, amount, added_by) VALUES (?, ?, ?, ?)",
                                   (c_name, pkg_name, pkg_price, st.session_state.user_info["name"]))
                         
-                        if editor_t and editor_t.strip() != "":
+                        # --- Intelligent Multi-Task Split & Auto-Assignment Logic ---
+                        # 1. Editor Tasks Parsing
+                        editor_split = parse_and_split_tasks(editor_t, "Video Task")
+                        for task_item in editor_split:
                             c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)",
-                                      (c_name, "Editor", editor_t, now_full_str))
-                        if social_t and social_t.strip() != "":
+                                      (c_name, "Editor", task_item, now_full_str))
+
+                        # 2. Social Media Tasks Parsing
+                        social_split = parse_and_split_tasks(social_t, "Social Post")
+                        for task_item in social_split:
                             c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)",
-                                      (c_name, "Social Media Specialist", social_t, now_full_str))
-                        
+                                      (c_name, "Social Media Specialist", task_item, now_full_str))
+
+                        # 3. Web Designer Tasks Parsing
+                        web_split = parse_and_split_tasks(web_t, "Web Design Task")
+                        for task_item in web_split:
+                            c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)",
+                                      (c_name, "Web Designer", task_item, now_full_str))
+
                         conn.commit()
                         st.success(t["client_added"])
                         st.rerun()
                     elif not pkg_options:
                         st.error(t["no_packages_err"])
 
-        # Display Clients DataFrame
         df_clients = pd.read_sql_query('''
             SELECT c.id, c.client_name, c.phone, p.name as package_name, p.price, COALESCE(p.duration_days, 30) as duration_days, c.created_at, c.notes 
             FROM clients c 
@@ -879,16 +896,16 @@ else:
                         remaining = (end_date - today).days
                         if remaining > 0:
                             days_left_list.append(f"{remaining} Days" if st.session_state.lang == "EN" else f"{remaining} يوم")
-                            status_list.append("Active 🟢" if st.session_state.lang == "EN" else "نشط 🟢")
+                            status_list.append("Active 🟢")
                         else:
-                            days_left_list.append("0 Days" if st.session_state.lang == "EN" else "0 يوم")
-                            status_list.append("Expired 🔴" if st.session_state.lang == "EN" else "منتهي 🔴")
+                            days_left_list.append("0 Days")
+                            status_list.append("Expired 🔴")
                     except Exception:
                         days_left_list.append("N/A")
-                        status_list.append("Active 🟢" if st.session_state.lang == "EN" else "نشط 🟢")
+                        status_list.append("Active 🟢")
                 else:
                     days_left_list.append("N/A")
-                    status_list.append("Active 🟢" if st.session_state.lang == "EN" else "نشط 🟢")
+                    status_list.append("Active 🟢")
             
             df_clients['Days Remaining' if st.session_state.lang == "EN" else 'المتبقي من الباقة'] = days_left_list
             df_clients['Subscription Status' if st.session_state.lang == "EN" else 'حالة الاشتراك'] = status_list
@@ -909,7 +926,6 @@ else:
                 st.success(t["client_deleted"])
                 st.rerun()
 
-        # Services Tracking Checklist Section
         st.divider()
         st.subheader(f"☑️ {t['track_services']}")
         
@@ -999,7 +1015,7 @@ else:
                     st.error(t["exp_err"])
         conn.close()
 
-    # --- 6. Packages Management ---
+    # --- 6. Packages Management (Supports Editor, Social & Web Tasks Parsing) ---
     elif choice == t["packages"]:
         st.title(f"📦 {t['packages']}")
         conn = get_db_connection()
@@ -1014,15 +1030,16 @@ else:
                     p_details = st.text_area(t["details"])
                     p_editor_tasks = st.text_area(t["editor_tasks"])
                     p_social_tasks = st.text_area(t["social_tasks"])
+                    p_web_tasks = st.text_area(t["web_tasks"])
                     
                     if st.form_submit_button(t["save"], type="primary"):
-                        c.execute("INSERT INTO packages (name, price, details, duration_days, editor_tasks, social_tasks) VALUES (?, ?, ?, ?, ?, ?)", 
-                                  (p_name, p_price, p_details, int(p_duration), p_editor_tasks, p_social_tasks))
+                        c.execute("INSERT INTO packages (name, price, details, duration_days, editor_tasks, social_tasks, web_tasks) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                                  (p_name, p_price, p_details, int(p_duration), p_editor_tasks, p_social_tasks, p_web_tasks))
                         conn.commit()
                         st.success("Package added successfully!")
                         st.rerun()
         
-        df_pkgs = pd.read_sql_query("SELECT id, name, price, duration_days, details, editor_tasks, social_tasks FROM packages", conn)
+        df_pkgs = pd.read_sql_query("SELECT id, name, price, duration_days, details, editor_tasks, social_tasks, web_tasks FROM packages", conn)
         st.dataframe(df_pkgs, use_container_width=True)
         
         if role == "Owner" and not df_pkgs.empty:
