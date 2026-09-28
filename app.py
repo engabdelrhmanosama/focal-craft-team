@@ -48,11 +48,9 @@ def get_image_base64(image_path):
 
 logo_base64 = get_image_base64(logo_path)
 
-# Custom Styling Injection for Ultra Professional Dark UI & Navbar & Large Cards
 def inject_custom_css():
     st.markdown("""
         <style>
-        /* Import Modern Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
         
         html, body, [class*="css"] {
@@ -61,12 +59,10 @@ def inject_custom_css():
             color: #f1f5f9 !important;
         }
 
-        /* Force Permanent Dark App Background */
         .stApp {
             background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #0f172a 100%) !important;
         }
 
-        /* Highly Professional Top Navigation Bar Styling */
         .top-navbar-container {
             background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(239, 68, 68, 0.3);
@@ -77,7 +73,6 @@ def inject_custom_css():
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
         }
 
-        /* Employee Large Card Grid Styling */
         .emp-card-pro {
             background: rgba(17, 24, 39, 0.75) !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -95,7 +90,6 @@ def inject_custom_css():
             box-shadow: 0 14px 40px -5px rgba(239, 68, 68, 0.2) !important;
         }
 
-        /* Badge Styling */
         .emp-badge {
             background: rgba(239, 68, 68, 0.15);
             color: #ef4444;
@@ -107,7 +101,6 @@ def inject_custom_css():
             display: inline-block;
         }
 
-        /* Metric Cards Styling */
         div[data-testid="stMetric"] {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)) !important;
             padding: 18px !important;
@@ -127,14 +120,12 @@ def inject_custom_css():
             font-weight: 800 !important;
         }
 
-        /* Button Styling */
         .stButton>button {
             border-radius: 8px !important;
             font-weight: 600 !important;
             transition: all 0.25s ease !important;
         }
 
-        /* Primary Action Buttons */
         .stButton>button[kind="primary"] {
             background: linear-gradient(135deg, #ef4444, #dc2626) !important;
             border: none !important;
@@ -147,7 +138,6 @@ def inject_custom_css():
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5) !important;
         }
 
-        /* Tabs Styling */
         .stTabs [data-baseweb="tab-list"] {
             gap: 10px;
             background-color: rgba(15, 23, 42, 0.6);
@@ -167,7 +157,6 @@ def inject_custom_css():
             color: #ffffff !important;
         }
 
-        /* Input Fields Styling */
         .stTextInput>div>div>input, .stSelectbox>div>div, .stTextArea>div>div>textarea {
             background-color: #1e293b !important;
             color: #f8fafc !important;
@@ -175,7 +164,6 @@ def inject_custom_css():
             border-radius: 8px !important;
         }
 
-        /* Tables & Dataframe styling */
         .stDataFrame {
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
             border-radius: 10px !important;
@@ -198,7 +186,6 @@ def get_db_connection():
     conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     c = conn.cursor()
     
-    # Users Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -210,7 +197,6 @@ def get_db_connection():
         )
     ''')
     
-    # Packages Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS packages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -224,7 +210,6 @@ def get_db_connection():
         )
     ''')
     
-    # Clients Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS clients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -238,7 +223,6 @@ def get_db_connection():
         )
     ''')
     
-    # Assigned Tasks Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS assigned_tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -252,7 +236,6 @@ def get_db_connection():
         )
     ''')
     
-    # Expenses Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS expenses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -264,7 +247,6 @@ def get_db_connection():
         )
     ''')
 
-    # Incomes Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS incomes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -276,7 +258,6 @@ def get_db_connection():
         )
     ''')
     
-    # Auto-Migrations for New Features
     c.execute("PRAGMA table_info(packages)")
     pkg_cols = [col[1] for col in c.fetchall()]
     if 'web_tasks' not in pkg_cols:
@@ -293,7 +274,6 @@ def get_db_connection():
         except Exception:
             pass
 
-    # Default Owner User Configuration
     owner_username = "Eng Abdelrhman Osama"
     default_password = hash_pass("#Bedo-1428")
     
@@ -315,7 +295,6 @@ def check_login(username, password):
     conn.close()
     return user
 
-# Helper Function: Auto-Splitter for Multiple Tasks
 def parse_and_split_tasks(task_text, default_label="Task"):
     tasks_list = []
     if not task_text or not task_text.strip():
@@ -339,7 +318,6 @@ def parse_and_split_tasks(task_text, default_label="Task"):
             
     return tasks_list
 
-# AI Smart Assignment Matcher
 def find_matching_employee(target_role, conn):
     c = conn.cursor()
     users = c.execute("SELECT name, role FROM users").fetchall()
@@ -604,7 +582,7 @@ if not st.session_state.logged_in:
                     st.error(t["login_error"])
 
 # ==========================================
-# 5. Main Dashboard (With Advanced Top Navigation Bar)
+# 5. Main Dashboard (With Navigation)
 # ==========================================
 else:
     st.markdown("<div class='top-navbar-container'>", unsafe_allow_html=True)
@@ -700,6 +678,7 @@ else:
                                       (datetime.now().strftime("%Y-%m-%d %H:%M"), row['id']))
                             conn.commit()
                             st.success("Task status updated successfully! 🚀" if st.session_state.lang == "EN" else "تم تحديث حالة التاسك وإنجازه بنجاح! 🚀")
+                            conn.close()
                             st.rerun()
 
         with tab2:
@@ -754,6 +733,7 @@ else:
                                                   (u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
                                     conn.commit()
                                     st.success(t["emp_added"])
+                                    conn.close()
                                     st.rerun()
                                 except sqlite3.IntegrityError:
                                     st.error(t["user_exists"])
@@ -820,6 +800,7 @@ else:
                                                           (e_id, e_username, e_fullname, e_role, e_salary, u_id))
                                             conn.commit()
                                             st.success(t["user_updated"])
+                                            conn.close()
                                             st.rerun()
                                         except sqlite3.IntegrityError:
                                             st.error(t["user_exists"])
@@ -830,6 +811,7 @@ else:
                                         c.execute("DELETE FROM users WHERE id = ?", (u_id,))
                                         conn.commit()
                                         st.success(t["user_deleted"])
+                                        conn.close()
                                         st.rerun()
                                 else:
                                     st.caption(t["cannot_del_self"])
@@ -909,21 +891,18 @@ else:
                         c.execute("INSERT INTO incomes (client_name, package_name, amount, added_by) VALUES (?, ?, ?, ?)",
                                   (c_name, pkg_name, pkg_price, st.session_state.user_info["name"]))
                         
-                        # 1. Editor Tasks Auto-Match & Assign
                         editor_split = parse_and_split_tasks(editor_t, "Video Task")
                         editor_user = find_matching_employee("Editor", conn)
                         for task_item in editor_split:
                             c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, assigned_user_name, task_description, created_at) VALUES (?, ?, ?, ?, ?)",
                                       (c_name, "Editor", editor_user, task_item, now_full_str))
 
-                        # 2. Social Media Tasks Auto-Match & Assign
                         social_split = parse_and_split_tasks(social_t, "Social Post")
                         social_user = find_matching_employee("Social Media Specialist", conn)
                         for task_item in social_split:
                             c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, assigned_user_name, task_description, created_at) VALUES (?, ?, ?, ?, ?)",
                                       (c_name, "Social Media Specialist", social_user, task_item, now_full_str))
 
-                        # 3. Web Designer Tasks Auto-Match & Assign
                         web_split = parse_and_split_tasks(web_t, "Web Design Task")
                         web_user = find_matching_employee("Web Designer", conn)
                         for task_item in web_split:
@@ -932,6 +911,7 @@ else:
 
                         conn.commit()
                         st.success(t["client_added"])
+                        conn.close()
                         st.rerun()
                     elif not pkg_options:
                         st.error(t["no_packages_err"])
@@ -986,6 +966,7 @@ else:
                 c.execute("DELETE FROM clients WHERE id = ?", (client_id_to_del,))
                 conn.commit()
                 st.success(t["client_deleted"])
+                conn.close()
                 st.rerun()
 
         st.divider()
@@ -1046,6 +1027,7 @@ else:
                                   (json.dumps(updated_tasks, ensure_ascii=False), selected_id))
                         conn.commit()
                         st.success(t["tasks_saved"])
+                        conn.close()
                         st.rerun()
                 else:
                     st.info("No services listed for this package.")
@@ -1099,6 +1081,7 @@ else:
                                   (p_name, p_price, p_details, int(p_duration), p_editor_tasks, p_social_tasks, p_web_tasks))
                         conn.commit()
                         st.success("Package added successfully!")
+                        conn.close()
                         st.rerun()
         
         df_pkgs = pd.read_sql_query("SELECT id, name, price, duration_days, details, editor_tasks, social_tasks, web_tasks FROM packages", conn)
@@ -1112,6 +1095,7 @@ else:
                 c.execute("DELETE FROM packages WHERE name = ?", (pkg_to_delete,))
                 conn.commit()
                 st.success(t["pkg_deleted"])
+                conn.close()
                 st.rerun()
         conn.close()
 
@@ -1123,7 +1107,7 @@ else:
         
         col_m1, col_m2 = st.columns(2)
         with col_m1:
-            selected_year = st.number_input("السنة المالي / Financial Year", min_value=2020, max_value=2030, value=datetime.now().year)
+            selected_year = st.number_input("السنة المالية / Financial Year", min_value=2020, max_value=2030, value=datetime.now().year)
         with col_m2:
             selected_month = st.selectbox("الشهر المالي / Financial Month", options=list(range(1, 13)), index=datetime.now().month - 1)
         
@@ -1132,11 +1116,9 @@ else:
         
         st.info(f"📅 نطاق التقرير الحالي للمصروفات والإيرادات: من **01-{selected_month:02d}-{selected_year}** إلى **{last_day:02d}-{selected_month:02d}-{selected_year}**")
 
-        # SQLite strftime Query Optimization (Prevents missing records due to exact timestamps)
         df_exp = pd.read_sql_query("SELECT id, title, amount, category, added_by, date FROM expenses WHERE strftime('%Y-%m', date) = ?", conn, params=(month_str,))
         df_inc = pd.read_sql_query("SELECT id, client_name, package_name, amount, added_by, date FROM incomes WHERE strftime('%Y-%m', date) = ?", conn, params=(month_str,))
         
-        # Calculate Team Monthly Salaries Total
         salaries_res = c.execute("SELECT SUM(salary) FROM users").fetchone()
         total_salaries = salaries_res[0] if salaries_res and salaries_res[0] else 0.0
 
@@ -1196,6 +1178,7 @@ else:
                     c.execute("DELETE FROM expenses WHERE id = ?", (exp_to_delete,))
                     conn.commit()
                     st.success(t["exp_deleted"])
+                    conn.close()
                     st.rerun()
                 
         conn.close()
