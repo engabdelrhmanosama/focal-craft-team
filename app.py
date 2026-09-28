@@ -49,24 +49,24 @@ logo_base64 = get_image_base64(logo_path)
 
 # Custom Styling Injection for Ultra Professional Dark UI & Navbar & Large Cards
 def inject_custom_css():
-    st.markdown(f"""
+    st.markdown("""
         <style>
         /* Import Modern Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
         
-        html, body, [class*="css"] {{
+        html, body, [class*="css"] {
             font-family: 'Cairo', 'Inter', sans-serif;
             background-color: #0b0f19 !important;
             color: #f1f5f9 !important;
-        }}
+        }
 
         /* Force Permanent Dark App Background */
-        .stApp {{
+        .stApp {
             background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #0f172a 100%) !important;
-        }}
+        }
 
         /* Top Navigation Bar Styling */
-        .top-navbar-container {{
+        .top-navbar-container {
             background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
@@ -74,10 +74,10 @@ def inject_custom_css():
             margin-bottom: 25px;
             backdrop-filter: blur(16px);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }}
+        }
 
         /* Employee Large Card Grid Styling */
-        .emp-card-pro {{
+        .emp-card-pro {
             background: rgba(17, 24, 39, 0.75) !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             border-radius: 16px !important;
@@ -86,16 +86,16 @@ def inject_custom_css():
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
             backdrop-filter: blur(12px) !important;
             transition: all 0.3s ease !important;
-        }}
+        }
 
-        .emp-card-pro:hover {{
+        .emp-card-pro:hover {
             border-color: rgba(239, 68, 68, 0.5) !important;
             transform: translateY(-4px) !important;
             box-shadow: 0 14px 40px -5px rgba(239, 68, 68, 0.2) !important;
-        }}
+        }
 
         /* Badge Styling */
-        .emp-badge {{
+        .emp-badge {
             background: rgba(239, 68, 68, 0.15);
             color: #ef4444;
             border: 1px solid rgba(239, 68, 68, 0.3);
@@ -104,82 +104,82 @@ def inject_custom_css():
             font-size: 0.85rem;
             font-weight: 700;
             display: inline-block;
-        }}
+        }
 
         /* Metric Cards Styling */
-        div[data-testid="stMetric"] {{
+        div[data-testid="stMetric"] {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)) !important;
             padding: 18px !important;
             border-radius: 12px !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
-        }}
+        }
 
-        div[data-testid="stMetricLabel"] {{
+        div[data-testid="stMetricLabel"] {
             color: #94a3b8 !important;
             font-size: 0.9rem !important;
             font-weight: 600 !important;
-        }}
+        }
 
-        div[data-testid="stMetricValue"] {{
+        div[data-testid="stMetricValue"] {
             color: #f8fafc !important;
             font-weight: 800 !important;
-        }}
+        }
 
         /* Button Styling */
-        .stButton>button {{
+        .stButton>button {
             border-radius: 8px !important;
             font-weight: 600 !important;
             transition: all 0.25s ease !important;
-        }}
+        }
 
         /* Primary Action Buttons */
-        .stButton>button[kind="primary"] {{
+        .stButton>button[kind="primary"] {
             background: linear-gradient(135deg, #ef4444, #dc2626) !important;
             border: none !important;
             color: white !important;
             box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
-        }}
+        }
 
-        .stButton>button[kind="primary"]:hover {{
+        .stButton>button[kind="primary"]:hover {
             background: linear-gradient(135deg, #f87171, #ef4444) !important;
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5) !important;
-        }}
+        }
 
         /* Tabs Styling */
-        .stTabs [data-baseweb="tab-list"] {{
+        .stTabs [data-baseweb="tab-list"] {
             gap: 10px;
             background-color: rgba(15, 23, 42, 0.6);
             padding: 6px;
             border-radius: 10px;
-        }}
+        }
 
-        .stTabs [data-baseweb="tab"] {{
+        .stTabs [data-baseweb="tab"] {
             border-radius: 8px;
             padding: 10px 20px;
             font-weight: 600;
             color: #94a3b8;
-        }}
+        }
 
-        .stTabs [aria-selected="true"] {{
+        .stTabs [aria-selected="true"] {
             background-color: #ef4444 !important;
             color: #ffffff !important;
-        }}
+        }
 
         /* Input Fields Styling */
-        .stTextInput>div>div>input, .stSelectbox>div>div, .stTextArea>div>div>textarea {{
+        .stTextInput>div>div>input, .stSelectbox>div>div, .stTextArea>div>div>textarea {
             background-color: #1e293b !important;
             color: #f8fafc !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
             border-radius: 8px !important;
-        }}
+        }
 
         /* Tables & Dataframe styling */
-        .stDataFrame {{
+        .stDataFrame {
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
             border-radius: 10px !important;
             overflow: hidden !important;
-        }}
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -188,7 +188,7 @@ inject_custom_css()
 # ==========================================
 # 2. Database Connection & Schema (SQLite)
 # ==========================================
-DB_FILE = "/tmp/focal_craft.db"
+DB_FILE = "focal_craft.db"
 
 def hash_pass(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -316,10 +316,6 @@ def check_login(username, password):
 
 # Helper Function: Auto-Splitter for Multiple Tasks
 def parse_and_split_tasks(task_text, default_label="Task"):
-    """
-    Parses strings like '3 videos' or '30 posts' and generates an array of itemized tasks.
-    Example: '3 videos' -> ['Video 1', 'Video 2', 'Video 3']
-    """
     tasks_list = []
     if not task_text or not task_text.strip():
         return tasks_list
@@ -344,9 +340,6 @@ def parse_and_split_tasks(task_text, default_label="Task"):
 
 # AI Smart Assignment Matcher: Finds real assigned employee in DB
 def find_matching_employee(target_role, conn):
-    """
-    Looks through existing employees in the database and matches them to the target task role.
-    """
     c = conn.cursor()
     users = c.execute("SELECT name, role FROM users").fetchall()
     
@@ -363,7 +356,6 @@ def find_matching_employee(target_role, conn):
         if "web" in target_role_lower and ("مواقع" in emp_role_lower or "ويب" in emp_role_lower or "web" in emp_role_lower or "designer" in emp_role_lower):
             return emp_name
             
-    # Fallback if no specific role matched
     return "فريق العمل (توزيع تلقائي)"
 
 # ==========================================
@@ -612,7 +604,6 @@ if not st.session_state.logged_in:
 # 5. Main Dashboard (With Top Navigation Bar)
 # ==========================================
 else:
-    # --- Top Navigation Bar ---
     st.markdown("<div class='top-navbar-container'>", unsafe_allow_html=True)
     top_col_a, top_col_b = st.columns([1, 4])
     
@@ -620,12 +611,11 @@ else:
         if logo_img:
             st.image(logo_img, width=110)
         else:
-            st.markdown(f"### 🎬 Focal Craft")
+            st.markdown("### 🎬 Focal Craft")
             
     with top_col_b:
         role = st.session_state.user_info["role"]
         
-        # Build Navigation Options Array
         nav_items = [t["home"], t["my_tasks"]]
         if role in ["Owner", "Manager"]:
             nav_items.append(t["employees"])
@@ -633,7 +623,6 @@ else:
         if role == "Owner":
             nav_items.append(t["audit"])
 
-        # Dynamically render Navigation Bar buttons horizontally
         nav_cols = st.columns(len(nav_items) + 2)
         
         if 'active_nav' not in st.session_state:
@@ -718,7 +707,7 @@ else:
                 
         conn.close()
 
-    # --- 3. Employee Hub (Large Cards View & Tasks Tracking) ---
+    # --- 3. Employee Hub ---
     elif choice == t.get("employees") and role in ["Owner", "Manager"]:
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
@@ -782,7 +771,6 @@ else:
 
             st.divider()
 
-            # --- Display Large Employee Cards Grid ---
             if not filtered_users:
                 st.info(t["no_employees_msg"])
             else:
@@ -882,7 +870,7 @@ else:
 
         conn.close()
 
-    # --- 4. Clients & Services Checklist Tracking (With Intelligent Auto Task Splitter & AI Employee Assignee) ---
+    # --- 4. Clients & Services Checklist Tracking ---
     elif choice == t["cs"]:
         st.title(f"📞 {t['cs']}")
         conn = get_db_connection()
@@ -918,7 +906,6 @@ else:
                         c.execute("INSERT INTO incomes (client_name, package_name, amount, added_by) VALUES (?, ?, ?, ?)",
                                   (c_name, pkg_name, pkg_price, st.session_state.user_info["name"]))
                         
-                        # --- Intelligent Multi-Task Split & Dynamic AI Employee Assignment ---
                         # 1. Editor Tasks Auto-Match & Assign
                         editor_split = parse_and_split_tasks(editor_t, "Video Task")
                         editor_user = find_matching_employee("Editor", conn)
@@ -1009,7 +996,7 @@ else:
         clients_data = c.fetchall()
         
         if clients_data:
-            client_names = [f"{row[0]} - {row[1]} ({row[2]})" for row in clients_data]
+            client_names = [f"{row[0]} - {row[1]} ({row[2] if row[2] else 'بدون باقة'})" for row in clients_data]
             selected_client_str = st.selectbox(t["select_client_track"], client_names)
             
             selected_id = int(selected_client_str.split(" - ")[0])
@@ -1087,7 +1074,7 @@ else:
                     st.error(t["exp_err"])
         conn.close()
 
-    # --- 6. Packages Management (Supports Editor, Social & Web Tasks Parsing) ---
+    # --- 6. Packages Management ---
     elif choice == t["packages"]:
         st.title(f"📦 {t['packages']}")
         conn = get_db_connection()
@@ -1098,7 +1085,7 @@ else:
                 with st.form("add_package_form"):
                     p_name = st.text_input(t["pkg_name"])
                     p_price = st.number_input(t["price"], min_value=0.0)
-                    p_duration = st.number_input(p_duration if 'p_duration' in locals() else t["pkg_duration"], min_value=1, value=30, step=1)
+                    p_duration = st.number_input(t["pkg_duration"], min_value=1, value=30, step=1)
                     p_details = st.text_area(t["details"])
                     p_editor_tasks = st.text_area(t["editor_tasks"])
                     p_social_tasks = st.text_area(t["social_tasks"])
