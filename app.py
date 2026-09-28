@@ -6,6 +6,7 @@ import os
 import base64
 import json
 import re
+import calendar
 from datetime import datetime, timedelta
 from PIL import Image
 from io import BytesIO
@@ -65,15 +66,15 @@ def inject_custom_css():
             background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #0f172a 100%) !important;
         }
 
-        /* Top Navigation Bar Styling */
+        /* Highly Professional Top Navigation Bar Styling */
         .top-navbar-container {
             background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 12px 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 18px;
+            padding: 16px 24px;
             margin-bottom: 25px;
             backdrop-filter: blur(16px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
         }
 
         /* Employee Large Card Grid Styling */
@@ -433,7 +434,7 @@ translations = {
         "total_exp": "Total Expenses (Outcomes)",
         "total_inc": "Total Revenue (Incomes)",
         "net_profit": "Net Profit",
-        "export_excel": "📥 Export Financial Sheet (Excel)",
+        "export_excel": "📥 Export Monthly Financial Sheet (Day 1 to 30/31)",
         "delete_exp": "Delete Expense",
         "exp_deleted": "Expense deleted successfully!",
         "no_clients": "No clients registered yet.",
@@ -530,7 +531,7 @@ translations = {
         "total_exp": "إجمالي المصروفات (الخارج)",
         "total_inc": "إجمالي الإيرادات (الداخل)",
         "net_profit": "صافي أرباح الشركة",
-        "export_excel": "📥 سحب الشيت المالي المكتمل (Excel)",
+        "export_excel": "📥 سحب شيت المصروفات المالي المكتمل (من يوم 1 لـ 30/31 من الشهر)",
         "delete_exp": "مسح مصروف محدد",
         "exp_deleted": "تم مسح المصروف بنجاح!",
         "no_clients": "لا يوجد عملاء مسجلين حالياً.",
@@ -601,7 +602,7 @@ if not st.session_state.logged_in:
                     st.error(t["login_error"])
 
 # ==========================================
-# 5. Main Dashboard (With Top Navigation Bar)
+# 5. Main Dashboard (With Advanced Top Navigation Bar)
 # ==========================================
 else:
     st.markdown("<div class='top-navbar-container'>", unsafe_allow_html=True)
@@ -1118,8 +1119,22 @@ else:
         conn = get_db_connection()
         c = conn.cursor()
         
-        df_exp = pd.read_sql_query("SELECT id, title, amount, category, added_by, date FROM expenses", conn)
-        df_inc = pd.read_sql_query("SELECT id, client_name, package_name, amount, added_by, date FROM incomes", conn)
+        # اختيار الشهر والسنة لاستخراج وتصفية الشيت بين يوم 1 و 30/31
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            selected_year = st.number_input("السنة المالي / Financial Year", min_value=2020, max_value=2030, value=datetime.now().year)
+        with col_m2:
+            selected_month = st.selectbox("الشهر المالي / Financial Month", options=list(range(1, 13)), index=datetime.now().month - 1)
+        
+        # تحديد بداية ونهاية الشهر أوتوماتيكياً (من يوم 1 إلى 30 أو 31)
+        _, last_day = calendar.monthrange(selected_year, selected_month)
+        start_date_str = f"{selected_year}-{selected_month:02d}-01 00:00:00"
+        end_date_str = f"{selected_year}-{selected_month:02d}-{last_day:02d} 23:59:59"
+        
+        st.info(f"📅 نطاق التقرير الحالي للمصروفات والإيرادات: من **1-{selected_month:02d}-{selected_year}** إلى **{last_day}-{selected_month:02d}-{selected_year}**")
+
+        df_exp = pd.read_sql_query("SELECT id, title, amount, category, added_by, date FROM expenses WHERE date >= ? AND date <= ?", conn, params=(start_date_str, end_date_str))
+        df_inc = pd.read_sql_query("SELECT id, client_name, package_name, amount, added_by, date FROM incomes WHERE date >= ? AND date <= ?", conn, params=(start_date_str, end_date_str))
         
         total_outcomes = df_exp['amount'].sum() if not df_exp.empty else 0.0
         total_incomes = df_inc['amount'].sum() if not df_inc.empty else 0.0
@@ -1140,14 +1155,14 @@ else:
             })
             df_summary.to_excel(writer, index=False, sheet_name='Summary')
             df_inc.to_excel(writer, index=False, sheet_name='Incomes')
-            df_exp.to_excel(writer, index=False, sheet_name='Expenses')
+            df_exp.to_excel(writer, index=False, sheet_name='Monthly Expenses (1 to 30-31)')
             
         excel_data = output.getvalue()
         
         st.download_button(
             label=t["export_excel"],
             data=excel_data,
-            file_name="focal_craft_financial_audit.xlsx",
+            file_name=f"focal_craft_monthly_audit_{selected_year}_{selected_month}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         )
