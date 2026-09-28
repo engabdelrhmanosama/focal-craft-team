@@ -11,7 +11,7 @@ from PIL import Image
 from io import BytesIO
 
 # ==========================================
-# 1. Page Config & Professional Dark Theme Setup
+# 1. Page Config & Professional Dark Theme
 # ==========================================
 logo_path = None
 for name in ["logo.jpg", "logo.jpg.jpeg", "logo.png", "logo.jpeg"]:
@@ -26,148 +26,88 @@ if logo_path:
     except Exception:
         logo_img = None
 
-if logo_img:
-    st.set_page_config(
-        page_title="Focal Craft Team",
-        page_icon=logo_img,
-        layout="wide"
-    )
-else:
-    st.set_page_config(
-        page_title="Focal Craft Team",
-        page_icon="🎬",
-        layout="wide"
-    )
+st.set_page_config(
+    page_title="Focal Craft Team",
+    page_icon=logo_img if logo_img else "🎬",
+    layout="wide"
+)
 
-def get_image_base64(image_path):
-    if image_path and os.path.exists(image_path):
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode()
-    return ""
+# Inject Custom High-End Dark Glassmorphism CSS
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Cairo', 'Inter', sans-serif;
+        background-color: #080c14 !important;
+        color: #f1f5f9 !important;
+    }
 
-logo_base64 = get_image_base64(logo_path)
+    .stApp {
+        background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 50%, #080c14 100%) !important;
+    }
 
-# Custom Styling Injection for Ultra Professional Dark UI
-def inject_custom_css():
-    st.markdown(f"""
-        <style>
-        /* Import Modern Google Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-        
-        html, body, [class*="css"] {{
-            font-family: 'Cairo', 'Inter', sans-serif;
-            background-color: #0b0f19 !important;
-            color: #f1f5f9 !important;
-        }}
+    section[data-testid="stSidebar"] {
+        background-color: #0b0f19 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
 
-        /* Force Permanent Dark App Background */
-        .stApp {{
-            background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #0f172a 100%) !important;
-        }}
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6) !important;
+        backdrop-filter: blur(16px) !important;
+    }
 
-        /* Sidebar Styling */
-        section[data-testid="stSidebar"] {{
-            background-color: #0f172a !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-        }}
+    div[data-testid="stMetric"] {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8)) !important;
+        padding: 18px !important;
+        border-radius: 14px !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+    }
 
-        /* Card Container Styling (Glassmorphism Effect) */
-        div[data-testid="stVerticalBlockBorderWrapper"] {{
-            background: rgba(17, 24, 39, 0.7) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            border-radius: 14px !important;
-            padding: 18px !important;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
-            backdrop-filter: blur(12px) !important;
-            transition: all 0.3s ease !important;
-        }}
+    div[data-testid="stMetricValue"] {
+        color: #38bdf8 !important;
+        font-weight: 800 !important;
+    }
 
-        div[data-testid="stVerticalBlockBorderWrapper"]:hover {{
-            border-color: rgba(239, 68, 68, 0.4) !important;
-            box-shadow: 0 12px 35px -5px rgba(239, 68, 68, 0.15) !important;
-        }}
+    .stButton>button[kind="primary"] {
+        background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+        border: none !important;
+        color: white !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important;
+        transition: all 0.3s ease !important;
+    }
 
-        /* Metric Cards Styling */
-        div[data-testid="stMetric"] {{
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)) !important;
-            padding: 18px !important;
-            border-radius: 12px !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
-        }}
+    .stButton>button[kind="primary"]:hover {
+        background: linear-gradient(135deg, #818cf8, #6366f1) !important;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6) !important;
+        transform: translateY(-2px);
+    }
 
-        div[data-testid="stMetricLabel"] {{
-            color: #94a3b8 !important;
-            font-size: 0.9rem !important;
-            font-weight: 600 !important;
-        }}
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: rgba(15, 23, 42, 0.8);
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-        div[data-testid="stMetricValue"] {{
-            color: #f8fafc !important;
-            font-weight: 800 !important;
-        }}
-
-        /* Button Styling */
-        .stButton>button {{
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            transition: all 0.25s ease !important;
-        }}
-
-        /* Primary Action Buttons */
-        .stButton>button[kind="primary"] {{
-            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-            border: none !important;
-            color: white !important;
-            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
-        }}
-
-        .stButton>button[kind="primary"]:hover {{
-            background: linear-gradient(135deg, #f87171, #ef4444) !important;
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5) !important;
-        }}
-
-        /* Tabs Styling */
-        .stTabs [data-baseweb="tab-list"] {{
-            gap: 10px;
-            background-color: rgba(15, 23, 42, 0.6);
-            padding: 6px;
-            border-radius: 10px;
-        }}
-
-        .stTabs [data-baseweb="tab"] {{
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-weight: 600;
-            color: #94a3b8;
-        }}
-
-        .stTabs [aria-selected="true"] {{
-            background-color: #ef4444 !important;
-            color: #ffffff !important;
-        }}
-
-        /* Input Fields Styling */
-        .stTextInput>div>div>input, .stSelectbox>div>div, .stTextArea>div>div>textarea {{
-            background-color: #1e293b !important;
-            color: #f8fafc !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            border-radius: 8px !important;
-        }}
-
-        /* Tables & Dataframe styling */
-        .stDataFrame {{
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            border-radius: 10px !important;
-            overflow: hidden !important;
-        }}
-        </style>
-    """, unsafe_allow_html=True)
-
-inject_custom_css()
+    .stTabs [aria-selected="true"] {
+        background-color: #4f46e5 !important;
+        color: #ffffff !important;
+        border-radius: 8px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # ==========================================
-# 2. Database Connection & Schema (SQLite)
+# 2. Database Connection & Schema
 # ==========================================
 DB_FILE = "/tmp/focal_craft.db"
 
@@ -178,7 +118,6 @@ def get_db_connection():
     conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     c = conn.cursor()
     
-    # Users Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -190,21 +129,16 @@ def get_db_connection():
         )
     ''')
     
-    # Packages Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS packages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             price REAL NOT NULL,
             details TEXT,
-            duration_days INTEGER DEFAULT 30,
-            editor_tasks TEXT DEFAULT '',
-            social_tasks TEXT DEFAULT '',
-            web_tasks TEXT DEFAULT ''
+            duration_days INTEGER DEFAULT 30
         )
     ''')
     
-    # Clients Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS clients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -218,7 +152,6 @@ def get_db_connection():
         )
     ''')
     
-    # Assigned Tasks Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS assigned_tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -231,7 +164,6 @@ def get_db_connection():
         )
     ''')
     
-    # Expenses Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS expenses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -243,7 +175,6 @@ def get_db_connection():
         )
     ''')
 
-    # Incomes Table
     c.execute('''
         CREATE TABLE IF NOT EXISTS incomes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -254,26 +185,12 @@ def get_db_connection():
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    
-    # Auto-Migrations for New Features
-    c.execute("PRAGMA table_info(packages)")
-    pkg_cols = [col[1] for col in c.fetchall()]
-    if 'web_tasks' not in pkg_cols:
-        try:
-            c.execute("ALTER TABLE packages ADD COLUMN web_tasks TEXT DEFAULT ''")
-        except Exception:
-            pass
 
-    # Default Owner User Configuration
-    owner_username = "Eng Abdelrhman Osama"
-    default_password = hash_pass("#Bedo-1428")
-    
+    # Default Owner
     c.execute("SELECT * FROM users WHERE role = 'Owner'")
-    owner_user = c.fetchone()
-    
-    if not owner_user:
+    if not c.fetchone():
         c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
-                  (owner_username, default_password, 'Owner', owner_username, 0.0))
+                  ("Eng Abdelrhman Osama", hash_pass("#Bedo-1428"), 'Owner', "Eng Abdelrhman Osama", 0.0))
     conn.commit()
     return conn
 
@@ -286,53 +203,71 @@ def check_login(username, password):
     conn.close()
     return user
 
-# Helper Function: Auto-Splitter for Multiple Tasks
-def parse_and_split_tasks(task_text, default_label="Task"):
+# ==========================================
+# 3. Smart Task AI Engine (Smart Parser)
+# ==========================================
+def smart_parse_package_details(details_text, client_name):
     """
-    Parses strings like '3 videos' or '30 posts' and generates an array of itemized tasks.
-    Example: '3 videos' -> ['Video 1', 'Video 2', 'Video 3']
+    مُحرك توجيه المهام الذكي:
+    يقرأ التفاصيل العامة للباقة، يفكك الأعداد والأنواع، ويوجه المهام تلقائياً للوظائف المعنية.
     """
-    tasks_list = []
-    if not task_text or not task_text.strip():
-        return tasks_list
-    
-    lines = [line.strip() for line in task_text.replace("\n", ",").split(",") if line.strip()]
-    
+    assigned_tasks = []
+    if not details_text or not details_text.strip():
+        return assigned_tasks
+
+    # تقسيم التفاصيل بناءً على الفواصل أو الأسطر
+    lines = [line.strip() for line in re.split(r'[\n,،]+', details_text) if line.strip()]
+
+    # الكلمات المفتاحية الذكية لربط المهام بمهن الموظفين
+    keywords_map = {
+        "Editor": ["فيديو", "فيديوهات", "مونتاج", "edit", "editor", "video", "reels", "ريلز", "ريل", "shorts"],
+        "Social Media Specialist": ["بوست", "بوستات", "منشور", "منشورات", "post", "posts", "سوشيال", "تصميمات", "تصميم غلاف"],
+        "Web Designer": ["موقع", "ويب", "ويب سايت", "site", "website", "web", "صفحة هبوط", "landing page", "تصميم موقع"]
+    }
+
+    now_full_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+
     for line in lines:
-        # Search for digits in the text line (e.g. 3 or 30)
+        # البحث عن أرقام داخل السطر (مثل 30 أو 3)
         match = re.search(r'(\d+)', line)
-        if match:
-            count = int(match.group(1))
-            # Extract description without numbers (e.g. "videos", "posts", "تصميم موقع")
-            clean_desc = re.sub(r'\d+', '', line).strip()
-            if not clean_desc:
-                clean_desc = default_label
-            
-            # Limit loop to prevent unintended infinite generation (max 100 per entry)
-            count = min(count, 100)
-            for i in range(1, count + 1):
-                tasks_list.append(f"{clean_desc} #{i}")
-        else:
-            tasks_list.append(line)
-            
-    return tasks_list
+        count = int(match.group(1)) if match else 1
+        count = min(count, 100) # حماية النظام من الأرقام الضخمة جداً
+
+        # تنظيف الوصف من الأرقام
+        clean_desc = re.sub(r'\d+', '', line).strip()
+        if not clean_desc:
+            clean_desc = "Task"
+
+        # تحديد الوظيفة المستهدفة ذكياً
+        matched_role = "General / Other"
+        line_lower = line.lower()
+        
+        for role_name, keywords in keywords_map.items():
+            if any(kw in line_lower for kw in keywords):
+                matched_role = role_name
+                break
+
+        # توليد المهام منفصلة وتوزيعها تلقائياً
+        for i in range(1, count + 1):
+            task_title = f"{clean_desc} #{i}" if count > 1 else clean_desc
+            assigned_tasks.append((client_name, matched_role, task_title, now_full_str))
+
+    return assigned_tasks
 
 # ==========================================
-# 3. Session State & Multi-Language Dictionary
+# 4. Session State & Language Setup
 # ==========================================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
-
-# Default Language Forced to English (EN)
 if "lang" not in st.session_state:
     st.session_state.lang = "EN"
 
 translations = {
     "EN": {
         "title": "Focal Craft Team",
-        "subtitle": "Unified Company Management System",
+        "subtitle": "Unified AI Management System",
         "username": "Username",
         "password": "Password",
         "login_btn": "Login",
@@ -343,93 +278,51 @@ translations = {
         "nav": "Navigation",
         "home": "Home Page",
         "my_tasks": "My Assigned Tasks",
-        "cs": "Clients & Services Tracking",
+        "cs": "Clients & Subscriptions",
         "expenses": "Log Expense",
-        "packages": "Packages Management",
-        "employees": "Employee Hub & Tasks",
-        "audit": "Financial Audit & Sheet (Owner Only)",
+        "packages": "Packages Hub",
+        "employees": "Team & Smart Task Audit",
+        "audit": "Financial Audit (Owner)",
         "logout": "Logout",
         "status": "System Status",
         "active": "Active 🟢",
         "add_pkg": "Add New Package",
         "pkg_name": "Package Name",
-        "price": "Price",
-        "pkg_duration": "Package Duration (Days)",
-        "details": "General Package Details",
-        "editor_tasks": "Editor Tasks (e.g. 3 videos, 1 thumbnail)",
-        "social_tasks": "Social Media Tasks (e.g. 30 posts, 5 reels)",
-        "web_tasks": "Web Designer Tasks (e.g. 1 website design, 2 landing pages)",
-        "save": "Save",
+        "price": "Price (EGP)",
+        "pkg_duration": "Duration (Days)",
+        "details": "Package Details (e.g. 30 posts, 3 videos, 1 website)",
+        "save": "Save Package",
         "add_emp": "➕ Add New Employee",
-        "add_emp_modal_title": "👤 Add New Employee",
         "fullname": "Full Name",
         "emp_added": "Employee added successfully!",
-        "user_exists": "Username or ID already exists!",
-        "delete": "Delete Account",
-        "edit": "Edit Details & Salary",
         "add_client": "Add New Client",
         "client_name": "Client Name",
         "phone": "Phone Number",
         "select_package": "Select Package",
         "notes": "Notes",
-        "client_added": "Client added, income logged & individual tasks automatically generated for team!",
-        "clients_list": "Subscribed Clients List",
-        "track_services": "Track Package Services & Tasks",
-        "select_client_track": "Select client to view or update services:",
-        "save_tasks": "Save Service Status 💾",
-        "tasks_saved": "Client service status updated successfully!",
-        "no_packages_err": "Please contact owner to add packages first!",
-        "exp_title": "Expense Title / Description",
+        "client_added": "Client created & tasks intelligently distributed to employees!",
+        "clients_list": "Client Subscriptions",
+        "track_services": "Service Checklist Tracking",
+        "exp_title": "Expense Description",
         "amount": "Amount",
         "category": "Category",
         "log_exp_btn": "Log Expense",
-        "exp_saved": "Expense logged successfully!",
-        "exp_err": "Please enter valid title and amount.",
         "delete_pkg": "Delete Package",
-        "pkg_deleted": "Package deleted successfully!",
-        "save_user_changes": "Save Changes 💾",
-        "user_updated": "User details updated successfully!",
-        "user_deleted": "User deleted successfully!",
-        "total_exp": "Total Expenses (Outcomes)",
-        "total_inc": "Total Revenue (Incomes)",
+        "total_exp": "Total Expenses",
+        "total_inc": "Total Revenue",
         "net_profit": "Net Profit",
-        "export_excel": "📥 Export Financial Sheet (Excel)",
-        "delete_exp": "Delete Expense",
-        "exp_deleted": "Expense deleted successfully!",
-        "no_clients": "No clients registered yet.",
-        "no_pkg_assigned": "Client is not assigned to any package.",
-        "completion_rate": "Service Completion Rate:",
-        "delete_client": "Delete Client (Owner Only)",
-        "client_deleted": "Client deleted successfully!",
-        "emp_team_head": "📋 Current Team Members",
-        "no_employees_msg": "No employees found matching the search.",
-        "job_title": "Job Title",
-        "salary_txt": "Monthly Salary",
-        "actions_btn": "⚙️ Options / Edit / Delete",
-        "edit_emp_modal": "Settings for account:",
-        "new_pass_optional": "New Password (leave empty to keep current)",
-        "del_emp_permanently": "🗑️ Delete Employee Permanently",
-        "cannot_del_self": "You cannot delete your active logged-in account.",
-        "task_overview": "📈 Employee Task & Timeline Tracking",
-        "no_tasks_msg": "No tasks assigned to employees yet.",
-        "total_tasks": "Total Assigned Tasks",
-        "completed_tasks": "Completed Tasks ✅",
-        "pending_tasks": "Pending Tasks ⏳",
-        "tasks_for_role": "📌 Tasks assigned to role:",
+        "export_excel": "📥 Export Excel Report",
         "col_task_id": "Task ID",
-        "col_client": "Client Name",
-        "col_desc": "Task Description",
+        "col_client": "Client",
+        "col_desc": "Task",
         "col_status": "Status",
-        "col_created": "Date Created",
-        "col_completed": "Completion Date & Time ⏱️",
-        "tab_emp_mgmt": "👤 Employee Management",
-        "tab_emp_tasks": "📊 Task Completion & Timeline Tracking",
-        "search_emp_placeholder": "🔍 Search employee by Name, ID, Username, or Role...",
-        "emp_id_label": "Employee ID (Custom)"
+        "col_created": "Assigned At",
+        "col_completed": "Completed At",
+        "tasks_for_role": "📌 Automated Tasks For:"
     },
     "AR": {
         "title": "فوكال كرافت تيم",
-        "subtitle": "نظام إدارة الشركة الموحد",
+        "subtitle": "نظام الإدارة الذكي الموحد",
         "username": "اسم المستخدم",
         "password": "كلمة المرور",
         "login_btn": "تسجيل الدخول",
@@ -440,106 +333,63 @@ translations = {
         "nav": "التنقل",
         "home": "الصفحة الرئيسية",
         "my_tasks": "مهامي والشغل المطلوب",
-        "cs": "إدارة العملاء ومتابعة الخدمات",
+        "cs": "إدارة العملاء والاشتراكات",
         "expenses": "تسجيل مصروف",
         "packages": "إدارة الباقات",
-        "employees": "الموظفين والمرتبات ومتابعة المهام",
-        "audit": "شيت الحسابات والتدقيق المالي (المالك فقط)",
+        "employees": "الموظفين ومتابعة المهام الذكية",
+        "audit": "شيت الحسابات والتدقيق (المالك)",
         "logout": "تسجيل الخروج",
         "status": "حالة النظام",
         "active": "نشط 🟢",
         "add_pkg": "إضافة باقة جديدة",
         "pkg_name": "اسم الباقة",
-        "price": "السعر",
+        "price": "السعر (جنيه)",
         "pkg_duration": "مدة الباقة (بالأيام)",
-        "details": "تفاصيل الباقة العامة",
-        "editor_tasks": "مهام المونتير (مثل: 3 فيديوهات، 1 صامب نيل)",
-        "social_tasks": "مهام مسؤول السوشيال ميديا (مثل: 30 بوست، 5 ريلز)",
-        "web_tasks": "مهام مصمم المواقع (مثل: تصميم موقع، 2 لاندينج بيج)",
-        "save": "حفظ",
+        "details": "تفاصيل الباقة العامة (مثال: 30 بوست، 3 فيديو، تصميم موقع)",
+        "save": "حفظ الباقة",
         "add_emp": "➕ إضافة موظف جديد",
-        "add_emp_modal_title": "👤 إضافة موظف جديد",
         "fullname": "الاسم الكامل",
         "emp_added": "تمت إضافة الموظف بنجاح!",
-        "user_exists": "اسم المستخدم أو الرقم التعريفي موجود بالفعل!",
-        "delete": "حذف حساب الموظف",
-        "edit": "تعديل البيانات والمرتب",
         "add_client": "إضافة عميل جديد",
         "client_name": "اسم العميل",
         "phone": "رقم الهاتف",
         "select_package": "اختر الباقة",
         "notes": "ملاحظات",
-        "client_added": "تمت إضافة العميل، إيراد الباقة، وتقسيم وتحويل المهام فردياً للموظفين تلقائياً!",
-        "clients_list": "قائمة العملاء المشتركين",
-        "track_services": "متابعة تنفيذ خدمات الباقة للعملاء",
-        "select_client_track": "اختر العميل لمتابعة أو تقديم الخدمات الخاصة به:",
-        "save_tasks": "حفظ تحديثات الخدمات 💾",
-        "tasks_saved": "تم حفظ حالة الخدمات للعميل بنجاح!",
-        "no_packages_err": "يرجى التواصل مع المالك لإضافة باقات أولاً!",
-        "exp_title": "بيان المصروف (السبب/الوصف)",
+        "client_added": "تم تسجيل العميل وتحليل وتوزيع المهام تلقائياً على الموظفين!",
+        "clients_list": "قائمة العملاء والاشتراكات",
+        "track_services": "متابعة تنفيذ خدمات الباقة",
+        "exp_title": "بيان المصروف",
         "amount": "المبلغ",
         "category": "القسم",
         "log_exp_btn": "تسجيل المصروف",
-        "exp_saved": "تم تسجيل المصروف بنجاح!",
-        "exp_err": "يرجى إدخال المبلغ والبيان بشكل صحيح.",
         "delete_pkg": "حذف باقة",
-        "pkg_deleted": "تم حذف الباقة بنجاح!",
-        "save_user_changes": "حفظ التعديلات 💾",
-        "user_updated": "تم تحديث بيانات الموظف والمرتب بنجاح!",
-        "user_deleted": "تم حذف الموظف بنجاح!",
-        "total_exp": "إجمالي المصروفات (الخارج)",
-        "total_inc": "إجمالي الإيرادات (الداخل)",
-        "net_profit": "صافي أرباح الشركة",
-        "export_excel": "📥 سحب الشيت المالي المكتمل (Excel)",
-        "delete_exp": "مسح مصروف محدد",
-        "exp_deleted": "تم مسح المصروف بنجاح!",
-        "no_clients": "لا يوجد عملاء مسجلين حالياً.",
-        "no_pkg_assigned": "العميل غير مشترك في باقة حالياً.",
-        "completion_rate": "نسبة إنجاز الخدمات:",
-        "delete_client": "حذف عميل (المالك فقط)",
-        "client_deleted": "تم حذف العميل بنجاح!",
-        "emp_team_head": "📋 فريق العمل الحالي",
-        "no_employees_msg": "لم يتم العثور على موظفين مطابقين للبحث.",
-        "job_title": "الوظيفة",
-        "salary_txt": "المرتب الشهري",
-        "actions_btn": "⚙️ خيارات / تعديل / حذف",
-        "edit_emp_modal": "إعدادات حساب:",
-        "new_pass_optional": "كلمة سر جديدة (اتركها فارغة بدون تغيير)",
-        "del_emp_permanently": "🗑️ حذف الموظف نهائياً",
-        "cannot_del_self": "لا يمكنك حذف حسابك الحالي الذي تستخدمه الآن.",
-        "task_overview": "📈 لوحة متابعة إنجاز الموظفين وتوقيت الانتهاء",
-        "no_tasks_msg": "لا توجد مهام مسجلة ومحولة للموظفين حتى الآن.",
-        "total_tasks": "إجمالي المهام المحولة",
-        "completed_tasks": "المهام المكتملة ✅",
-        "pending_tasks": "المهام قيد التنفيذ ⏳",
-        "tasks_for_role": "📌 المهام الموجهة لوظيفة:",
+        "total_exp": "إجمالي المصروفات",
+        "total_inc": "إجمالي الإيرادات",
+        "net_profit": "صافي الأرباح",
+        "export_excel": "📥 سحب الشيت المالي (Excel)",
         "col_task_id": "رقم المهمة",
         "col_client": "العميل",
-        "col_desc": "تفاصيل المهمة المطلوب تنفيذها",
-        "col_status": "حالة المهمة",
-        "col_created": "تاريخ الإنشاء",
-        "col_completed": "تاريخ وتوقيت الإنجاز ⏱️",
-        "tab_emp_mgmt": "👤 إدارة الموظفين والمرتبات",
-        "tab_emp_tasks": "📊 متابعة إنجاز مهام الموظفين والتوقيت",
-        "search_emp_placeholder": "🔍 ابحث عن موظف بالاسم، الرقم التعريفي (ID)، اليوزر، أو الوظيفة...",
-        "emp_id_label": "الرقم التعريفي (ID مخصص)"
+        "col_desc": "تفاصيل المهمة",
+        "col_status": "الحالة",
+        "col_created": "تاريخ التكاليف",
+        "col_completed": "تاريخ الإنجاز",
+        "tasks_for_role": "📌 المهام الموزعة تلقائياً لوظيفة:"
     }
 }
 
 t = translations[st.session_state.lang]
 
 # ==========================================
-# 4. Login Interface
+# 5. Login View
 # ==========================================
 if not st.session_state.logged_in:
-    col1, col2, col3 = st.columns([1, 2, 1])
+    _, col2, _ = st.columns([1, 2, 1])
     with col2:
         if logo_img:
-            st.image(logo_img, width=150)
-        st.markdown(f"<h2 style='text-align: center; font-weight: 800; color: #f8fafc;'>{t['title']}</h2>", unsafe_allow_html=True)
+            st.image(logo_img, width=140)
+        st.markdown(f"<h2 style='text-align: center; color: #f8fafc;'>{t['title']}</h2>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align: center; color: #94a3b8;'>{t['subtitle']}</p>", unsafe_allow_html=True)
         
-        # Language Switcher Only (Theme option removed)
         selected_lang = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
                                  index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
         st.session_state.lang = "EN" if selected_lang == "English" else "AR"
@@ -548,9 +398,7 @@ if not st.session_state.logged_in:
         with st.form("login_form"):
             username = st.text_input(t["username"])
             password = st.text_input(t["password"], type="password")
-            submit = st.form_submit_button(t["login_btn"], use_container_width=True, type="primary")
-            
-            if submit:
+            if st.form_submit_button(t["login_btn"], use_container_width=True, type="primary"):
                 user = check_login(username, password)
                 if user:
                     st.session_state.logged_in = True
@@ -561,259 +409,131 @@ if not st.session_state.logged_in:
                     st.error(t["login_error"])
 
 # ==========================================
-# 5. Main Dashboard
+# 6. Main Application View
 # ==========================================
 else:
     with st.sidebar:
         if logo_img:
             st.image(logo_img, use_container_width=True)
-        st.markdown(f"<h3 style='margin-bottom:0; color: #f8fafc;'>{t['title']}</h3>", unsafe_allow_html=True)
-        st.caption(f"✨ {t['subtitle']}")
+        st.markdown(f"<h3 style='color: #f8fafc; margin-bottom: 0;'>{t['title']}</h3>", unsafe_allow_html=True)
+        st.caption(f"⚡ {t['subtitle']}")
         st.write(f"{t['welcome']}: **{st.session_state.user_info['name']}**")
         st.caption(f"{t['role']}: `{st.session_state.user_info['role']}`")
         
-        # Language Toggle Only
         lang_choice = st.radio("🌐 Language / اللغة", ["English", "العربية"], 
                                index=0 if st.session_state.lang == "EN" else 1, horizontal=True)
         st.session_state.lang = "EN" if lang_choice == "English" else "AR"
         t = translations[st.session_state.lang]
-        
         st.divider()
         
         role = st.session_state.user_info["role"]
-        
         menu_options = [t["home"], t["my_tasks"]]
         
         if role in ["Owner", "Manager"]:
             menu_options.append(t["employees"])
             
         menu_options.extend([t["cs"], t["expenses"], t["packages"]])
-        
         if role == "Owner":
             menu_options.append(t["audit"])
             
         choice = st.radio(t["nav"], menu_options)
-        
         st.divider()
         if st.button(t["logout"], use_container_width=True, type="primary"):
             st.session_state.logged_in = False
             st.session_state.user_info = None
             st.rerun()
 
-    # --- 1. Home Page ---
+    # --- Home Page ---
     if choice == t["home"]:
-        st.title(f"🎬 {t['home']}")
-        st.write(f"{t['welcome']} **{st.session_state.user_info['name']}**")
-        
+        st.title(f"🚀 {t['home']}")
         col1, col2, col3 = st.columns(3)
         col1.metric(t["status"], t["active"])
         col2.metric(t["username"], st.session_state.user_info["username"])
         col3.metric(t["role"], st.session_state.user_info["role"])
 
-    # --- 2. My Assigned Tasks ---
+    # --- My Assigned Tasks ---
     elif choice == t["my_tasks"]:
         st.title(f"📋 {t['my_tasks']}")
         conn = get_db_connection()
         c = conn.cursor()
         
-        if role != "Owner":
-            tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks WHERE assigned_role = ?", conn, params=(role,))
+        user_role = role
+        if user_role != "Owner":
+            tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks WHERE assigned_role = ?", conn, params=(user_role,))
         else:
             tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks", conn)
 
-        pending_tasks = tasks_df[tasks_df["status"].isin(["Pending", "قيد التنفيذ"])] if not tasks_df.empty else pd.DataFrame()
-        completed_tasks = tasks_df[tasks_df["status"].isin(["Completed ✅", "مكتمل ✅"])] if not tasks_df.empty else pd.DataFrame()
+        pending = tasks_df[tasks_df["status"] == "Pending"] if not tasks_df.empty else pd.DataFrame()
+        completed = tasks_df[tasks_df["status"] == "Completed ✅"] if not tasks_df.empty else pd.DataFrame()
 
-        tab1, tab2 = st.tabs(["⏳ Pending Tasks" if st.session_state.lang == "EN" else "⏳ مهام قيد التنفيذ", 
-                              "✅ Completed Tasks" if st.session_state.lang == "EN" else "✅ مهام تم إنجازها"])
-
-        with tab1:
-            if pending_tasks.empty:
-                st.info("No pending tasks assigned right now! 🎉" if st.session_state.lang == "EN" else "لا توجد مهام معلقة مطلوب تنفيذها حالياً! 🎉")
+        t1, t2 = st.tabs(["⏳ Pending Tasks", "✅ Completed Tasks"])
+        with t1:
+            if pending.empty:
+                st.info("No pending tasks assigned right now! 🎉")
             else:
-                for idx, row in pending_tasks.iterrows():
-                    with st.expander(f"📌 Client: {row['client_name']} - {row['task_description']}"):
-                        st.write(f"**Task:** {row['task_description']}")
-                        st.write(f"**Target Role:** {row['assigned_role']}")
-                        st.write(f"**Created At:** {row['created_at']}")
-                        
-                        done_label = "Mark as Done ✅" if st.session_state.lang == "EN" else "تحديد كـ مكتمل ✅"
-                        if st.button(done_label, key=f"task_done_{row['id']}", type="primary"):
+                for idx, row in pending.iterrows():
+                    with st.expander(f"📌 Client: {row['client_name']} — {row['task_description']}"):
+                        st.write(f"**Assigned Role:** {row['assigned_role']}")
+                        st.write(f"**Date:** {row['created_at']}")
+                        if st.button("Mark as Complete ✅", key=f"done_{row['id']}", type="primary"):
                             c.execute("UPDATE assigned_tasks SET status = 'Completed ✅', completed_at = ? WHERE id = ?",
                                       (datetime.now().strftime("%Y-%m-%d %H:%M"), row['id']))
                             conn.commit()
-                            st.success("Task status updated successfully! 🚀" if st.session_state.lang == "EN" else "تم تحديث حالة التاسك وإنجازه بنجاح! 🚀")
+                            st.success("Task Completed!")
                             st.rerun()
-
-        with tab2:
-            if completed_tasks.empty:
-                st.caption("No completed tasks yet." if st.session_state.lang == "EN" else "لم يتم إنجاز مهام بعد.")
+        with t2:
+            if not completed.empty:
+                st.dataframe(completed[["client_name", "assigned_role", "task_description", "completed_at"]], use_container_width=True)
             else:
-                st.dataframe(completed_tasks[["client_name", "assigned_role", "task_description", "completed_at"]], use_container_width=True)
-                
+                st.caption("No completed tasks yet.")
         conn.close()
 
-    # --- 3. Employee Hub with Custom Roles, IDs & Tasks ---
+    # --- Employee Hub & Automated Task Audit ---
     elif choice == t.get("employees") and role in ["Owner", "Manager"]:
         st.title(f"👥 {t['employees']}")
         conn = get_db_connection()
         c = conn.cursor()
         
-        tab_emp_mgmt, tab_emp_tasks = st.tabs([
-            t["tab_emp_mgmt"], 
-            t["tab_emp_tasks"]
-        ])
-
-        with tab_emp_mgmt:
-            col_head1, col_head2 = st.columns([3, 1])
-            with col_head1:
-                st.subheader(t["emp_team_head"])
-            with col_head2:
-                with st.popover(t["add_emp"], use_container_width=True):
-                    st.markdown(f"### {t['add_emp_modal_title']}")
-                    with st.form("quick_add_emp"):
-                        u_custom_id = st.number_input(f"{t['emp_id_label']} (Optional/Auto)", min_value=1, step=1, value=None)
-                        u_fullname = st.text_input(t["fullname"])
-                        u_username = st.text_input(t["username"])
-                        u_password = st.text_input(t["password"], type="password")
-                        u_role_preset = st.selectbox(t["role"], ["Owner", "Manager", "Editor", "Social Media Specialist", "Web Designer", "Other / Custom"])
-                        
-                        if "Custom" in u_role_preset or "أخرى" in u_role_preset:
-                            u_role_custom = st.text_input("Custom Role Title / الوظيفة المخصصة:")
-                            final_role = u_role_custom.strip() if u_role_custom.strip() != "" else "Employee"
-                        else:
-                            final_role = u_role_preset
-                            
-                        u_salary = st.number_input(f"{t['salary_txt']} (EGP)", min_value=0.0, step=500.0)
-
-                        if st.form_submit_button(f"{t['save']} 🚀", use_container_width=True, type="primary"):
-                            if u_fullname and u_username and u_password:
-                                try:
-                                    if u_custom_id:
-                                        c.execute("INSERT INTO users (id, username, password, role, name, salary) VALUES (?, ?, ?, ?, ?, ?)",
-                                                  (int(u_custom_id), u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
-                                    else:
-                                        c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
-                                                  (u_username, hash_pass(u_password), final_role, u_fullname, u_salary))
-                                    conn.commit()
-                                    st.success(t["emp_added"])
-                                    st.rerun()
-                                except sqlite3.IntegrityError:
-                                    st.error(t["user_exists"])
-                            else:
-                                st.error("Please fill in all required fields.")
-
-            search_query = st.text_input("", placeholder=t["search_emp_placeholder"])
-            all_users = c.execute("SELECT id, name, username, role, salary FROM users").fetchall()
-
-            if search_query.strip() != "":
-                q = search_query.strip().lower()
-                filtered_users = [
-                    u for u in all_users 
-                    if q in str(u[0]).lower() or q in u[1].lower() or q in u[2].lower() or q in u[3].lower()
-                ]
-            else:
-                filtered_users = all_users
-
-            st.divider()
-
-            if not filtered_users:
-                st.info(t["no_employees_msg"])
-            else:
-                cols_per_row = 2
-                for i in range(0, len(filtered_users), cols_per_row):
-                    row_users = filtered_users[i:i+cols_per_row]
-                    cols = st.columns(cols_per_row)
-                    
-                    for idx, user_data in enumerate(row_users):
-                        u_id, u_name, u_uname, u_role, u_sal = user_data
-                        
-                        with cols[idx]:
-                            with st.container(border=True):
-                                col_card_title, col_card_id = st.columns([3, 1])
-                                with col_card_title:
-                                    st.markdown(f"### 👤 {u_name}")
-                                with col_card_id:
-                                    st.markdown(f"**`ID: #{u_id}`**")
-                                    
-                                st.markdown(f"💼 **{t['job_title']}:** `{u_role}`")
-                                st.markdown(f"💰 **{t['salary_txt']}:** `{u_sal:,.2f} EGP`")
-                                st.caption(f"🔑 {t['username']}: {u_uname} | 🆔 ID: #{u_id}")
-
-                                with st.popover(t["actions_btn"], use_container_width=True):
-                                    st.markdown(f"#### {t['edit_emp_modal']} {u_name}")
-                                    
-                                    with st.form(f"edit_form_{u_id}"):
-                                        e_id = st.number_input(t["emp_id_label"], value=int(u_id), step=1, min_value=1)
-                                        e_fullname = st.text_input(t["fullname"], value=u_name)
-                                        e_username = st.text_input(t["username"], value=u_uname)
-                                        e_role = st.text_input(t["job_title"], value=u_role)
-                                        e_salary = st.number_input(f"{t['salary_txt']} (EGP)", value=float(u_sal if u_sal else 0.0), step=500.0)
-                                        e_password = st.text_input(t["new_pass_optional"], type="password")
-
-                                        if st.form_submit_button(t["save_user_changes"], use_container_width=True, type="primary"):
-                                            try:
-                                                if e_password.strip() != "":
-                                                    c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, salary = ?, password = ? WHERE id = ?", 
-                                                              (e_id, e_username, e_fullname, e_role, e_salary, hash_pass(e_password), u_id))
-                                                else:
-                                                    c.execute("UPDATE users SET id = ?, username = ?, name = ?, role = ?, salary = ? WHERE id = ?", 
-                                                              (e_id, e_username, e_fullname, e_role, e_salary, u_id))
-                                                conn.commit()
-                                                st.success(t["user_updated"])
-                                                st.rerun()
-                                            except sqlite3.IntegrityError:
-                                                st.error(t["user_exists"])
-
-                                    st.divider()
-                                    if u_uname != st.session_state.user_info["username"]:
-                                        if st.button(t["del_emp_permanently"], key=f"del_{u_id}", type="primary", use_container_width=True):
-                                            c.execute("DELETE FROM users WHERE id = ?", (u_id,))
-                                            conn.commit()
-                                            st.success(t["user_deleted"])
-                                            st.rerun()
-                                    else:
-                                        st.caption(t["cannot_del_self"])
-
-        with tab_emp_tasks:
-            st.subheader(t["task_overview"])
-            tasks_df = pd.read_sql_query("SELECT * FROM assigned_tasks", conn)
+        tab_emp, tab_tasks = st.tabs(["👤 Employee Directory", "🤖 Automated Task Distribution Audit"])
+        
+        with tab_emp:
+            with st.popover(t["add_emp"], use_container_width=True):
+                with st.form("add_emp_form"):
+                    u_fullname = st.text_input(t["fullname"])
+                    u_username = st.text_input(t["username"])
+                    u_password = st.text_input(t["password"], type="password")
+                    u_role = st.selectbox(t["role"], ["Editor", "Social Media Specialist", "Web Designer", "Manager", "Owner", "Other"])
+                    u_salary = st.number_input("Salary (EGP)", min_value=0.0)
+                    if st.form_submit_button("Save Employee", type="primary"):
+                        try:
+                            c.execute("INSERT INTO users (username, password, role, name, salary) VALUES (?, ?, ?, ?, ?)",
+                                      (u_username, hash_pass(u_password), u_role, u_fullname, u_salary))
+                            conn.commit()
+                            st.success(t["emp_added"])
+                            st.rerun()
+                        except Exception:
+                            st.error("Username already exists!")
             
-            if tasks_df.empty:
-                st.info(t["no_tasks_msg"])
+            users_df = pd.read_sql_query("SELECT id, name, username, role, salary FROM users", conn)
+            st.dataframe(users_df, use_container_width=True)
+
+        with tab_tasks:
+            st.subheader("📊 Smart Auto-Routed Tasks Overview")
+            all_tasks = pd.read_sql_query("SELECT * FROM assigned_tasks", conn)
+            if all_tasks.empty:
+                st.info("No tasks automatically generated yet.")
             else:
-                col_m1, col_m2, col_m3 = st.columns(3)
-                tot = len(tasks_df)
-                dn = len(tasks_df[tasks_df["status"].isin(["Completed ✅", "مكتمل ✅"])])
-                pn = tot - dn
-
-                col_m1.metric(t["total_tasks"], tot)
-                col_m2.metric(t["completed_tasks"], dn)
-                col_m3.metric(t["pending_tasks"], pn)
-
-                st.divider()
-                
-                roles_in_tasks = tasks_df["assigned_role"].unique()
-                for r in roles_in_tasks:
+                roles = all_tasks["assigned_role"].unique()
+                for r in roles:
                     with st.expander(f"{t['tasks_for_role']} **{r}**", expanded=True):
-                        sub_df = tasks_df[tasks_df["assigned_role"] == r]
-                        st.dataframe(
-                            sub_df[["id", "client_name", "task_description", "status", "created_at", "completed_at"]].rename(
-                                columns={
-                                    "id": t["col_task_id"],
-                                    "client_name": t["col_client"],
-                                    "task_description": t["col_desc"],
-                                    "status": t["col_status"],
-                                    "created_at": t["col_created"],
-                                    "completed_at": t["col_completed"]
-                                }
-                            ), 
-                            use_container_width=True
-                        )
-
+                        sub = all_tasks[all_tasks["assigned_role"] == r]
+                        st.dataframe(sub[["id", "client_name", "task_description", "status", "created_at", "completed_at"]].rename(
+                            columns={"id": t["col_task_id"], "client_name": t["col_client"], "task_description": t["col_desc"],
+                                     "status": t["col_status"], "created_at": t["col_created"], "completed_at": t["col_completed"]}
+                        ), use_container_width=True)
         conn.close()
 
-    # --- 4. Clients & Services Checklist Tracking (With Intelligent Auto Task Splitter) ---
+    # --- Clients & Automated Task Smart Engine Integration ---
     elif choice == t["cs"]:
         st.title(f"📞 {t['cs']}")
         conn = get_db_connection()
@@ -824,198 +544,42 @@ else:
                 c_name = st.text_input(t["client_name"])
                 c_phone = st.text_input(t["phone"])
                 
-                pkgs = pd.read_sql_query("SELECT id, name, price, details, editor_tasks, social_tasks, web_tasks FROM packages", conn)
-                pkg_options = {f"{row['name']} ({row['price']:,.0f} EGP)": (row['id'], row['price'], row['details'], row['name'], row['editor_tasks'], row['social_tasks'], row['web_tasks']) for _, row in pkgs.iterrows()} if not pkgs.empty else {}
+                pkgs = pd.read_sql_query("SELECT id, name, price, details FROM packages", conn)
+                pkg_options = {f"{row['name']} ({row['price']:,.0f} EGP)": (row['id'], row['price'], row['details'], row['name']) for _, row in pkgs.iterrows()} if not pkgs.empty else {}
                 
-                selected_pkg_str = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["N/A"])
+                selected_pkg = st.selectbox(t["select_package"], list(pkg_options.keys()) if pkg_options else ["N/A"])
                 c_notes = st.text_area(t["notes"])
                 
-                if st.form_submit_button(t["save"], type="primary"):
+                if st.form_submit_button("Create Client & Auto-Route Tasks", type="primary"):
                     if c_name and pkg_options:
-                        pkg_id, pkg_price, pkg_details, pkg_name, editor_t, social_t, web_t = pkg_options[selected_pkg_str]
+                        pkg_id, pkg_price, pkg_details, pkg_name = pkg_options[selected_pkg]
+                        current_date = datetime.now().strftime("%Y-%m-%d")
                         
-                        initial_tasks = {}
-                        if pkg_details:
-                            services = [s.strip() for s in pkg_details.replace("\n", ",").split(",") if s.strip()]
-                            for service in services:
-                                initial_tasks[service] = False
+                        # 1. Insert Client
+                        c.execute("INSERT INTO clients (client_name, phone, package_id, notes, created_at) VALUES (?, ?, ?, ?, ?)",
+                                  (c_name, c_phone, pkg_id, c_notes, current_date))
                         
-                        current_date_str = datetime.now().strftime("%Y-%m-%d")
-                        now_full_str = datetime.now().strftime("%Y-%m-%d %H:%M")
-                        
-                        c.execute("INSERT INTO clients (client_name, phone, package_id, notes, tasks_status, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-                                  (c_name, c_phone, pkg_id, c_notes, json.dumps(initial_tasks, ensure_ascii=False), current_date_str))
-                        
+                        # 2. Log Income
                         c.execute("INSERT INTO incomes (client_name, package_name, amount, added_by) VALUES (?, ?, ?, ?)",
                                   (c_name, pkg_name, pkg_price, st.session_state.user_info["name"]))
                         
-                        # --- Intelligent Multi-Task Split & Auto-Assignment Logic ---
-                        # 1. Editor Tasks Parsing
-                        editor_split = parse_and_split_tasks(editor_t, "Video Task")
-                        for task_item in editor_split:
-                            c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)",
-                                      (c_name, "Editor", task_item, now_full_str))
-
-                        # 2. Social Media Tasks Parsing
-                        social_split = parse_and_split_tasks(social_t, "Social Post")
-                        for task_item in social_split:
-                            c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)",
-                                      (c_name, "Social Media Specialist", task_item, now_full_str))
-
-                        # 3. Web Designer Tasks Parsing
-                        web_split = parse_and_split_tasks(web_t, "Web Design Task")
-                        for task_item in web_split:
-                            c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)",
-                                      (c_name, "Web Designer", task_item, now_full_str))
+                        # 3. AI Smart Task Parsing & Automated Role Routing
+                        generated_tasks = smart_parse_package_details(pkg_details, c_name)
+                        for task in generated_tasks:
+                            c.execute("INSERT INTO assigned_tasks (client_name, assigned_role, task_description, created_at) VALUES (?, ?, ?, ?)", task)
 
                         conn.commit()
                         st.success(t["client_added"])
                         st.rerun()
-                    elif not pkg_options:
-                        st.error(t["no_packages_err"])
 
-        df_clients = pd.read_sql_query('''
-            SELECT c.id, c.client_name, c.phone, p.name as package_name, p.price, COALESCE(p.duration_days, 30) as duration_days, c.created_at, c.notes 
-            FROM clients c 
-            LEFT JOIN packages p ON c.package_id = p.id
+        clients = pd.read_sql_query('''
+            SELECT c.id, c.client_name, c.phone, p.name as package, p.price, c.created_at, c.notes 
+            FROM clients c LEFT JOIN packages p ON c.package_id = p.id
         ''', conn)
-        
-        if not df_clients.empty:
-            today = datetime.now().date()
-            days_left_list = []
-            status_list = []
-            
-            for idx, row in df_clients.iterrows():
-                created_str = row['created_at']
-                pkg_days = int(row['duration_days']) if pd.notnull(row['duration_days']) else 30
-                
-                if pd.notnull(created_str) and created_str != "":
-                    try:
-                        start_date = datetime.strptime(created_str, "%Y-%m-%d").date()
-                        end_date = start_date + timedelta(days=pkg_days)
-                        remaining = (end_date - today).days
-                        if remaining > 0:
-                            days_left_list.append(f"{remaining} Days" if st.session_state.lang == "EN" else f"{remaining} يوم")
-                            status_list.append("Active 🟢")
-                        else:
-                            days_left_list.append("0 Days")
-                            status_list.append("Expired 🔴")
-                    except Exception:
-                        days_left_list.append("N/A")
-                        status_list.append("Active 🟢")
-                else:
-                    days_left_list.append("N/A")
-                    status_list.append("Active 🟢")
-            
-            df_clients['Days Remaining' if st.session_state.lang == "EN" else 'المتبقي من الباقة'] = days_left_list
-            df_clients['Subscription Status' if st.session_state.lang == "EN" else 'حالة الاشتراك'] = status_list
-
-        st.subheader(f"📋 {t['clients_list']}")
-        st.dataframe(df_clients, use_container_width=True)
-        
-        if role == "Owner" and not df_clients.empty:
-            st.divider()
-            st.subheader(f"🗑️ {t['delete_client']}")
-            client_options = {f"{row['id']} - {row['client_name']}": row['id'] for _, row in df_clients.iterrows()}
-            selected_client_del = st.selectbox("Select Client to Delete:" if st.session_state.lang == "EN" else "اختر العميل المراد حذفه نهائياً:", list(client_options.keys()))
-            
-            if st.button("Delete Selected Client ❌" if st.session_state.lang == "EN" else "حذف العميل المحدد ❌", type="primary"):
-                client_id_to_del = client_options[selected_client_del]
-                c.execute("DELETE FROM clients WHERE id = ?", (client_id_to_del,))
-                conn.commit()
-                st.success(t["client_deleted"])
-                st.rerun()
-
-        st.divider()
-        st.subheader(f"☑️ {t['track_services']}")
-        
-        c.execute('''
-            SELECT c.id, c.client_name, p.name, c.tasks_status, p.details 
-            FROM clients c 
-            LEFT JOIN packages p ON c.package_id = p.id
-        ''')
-        clients_data = c.fetchall()
-        
-        if clients_data:
-            client_names = [f"{row[0]} - {row[1]} ({row[2]})" for row in clients_data]
-            selected_client_str = st.selectbox(t["select_client_track"], client_names)
-            
-            selected_id = int(selected_client_str.split(" - ")[0])
-            
-            c.execute("SELECT client_name, tasks_status, package_id FROM clients WHERE id = ?", (selected_id,))
-            cl_info = c.fetchone()
-            client_name, tasks_json, pkg_id = cl_info[0], cl_info[1], cl_info[2]
-            
-            c.execute("SELECT name, details FROM packages WHERE id = ?", (pkg_id,))
-            pkg_info = c.fetchone()
-            
-            if pkg_info:
-                st.markdown(f"#### Client: **{client_name}** | Package: **{pkg_info[0]}**")
-                
-                try:
-                    tasks_dict = json.loads(tasks_json) if tasks_json else {}
-                except:
-                    tasks_dict = {}
-
-                raw_services = [s.strip() for s in pkg_info[1].replace("\n", ",").split(",") if s.strip()] if pkg_info[1] else []
-                for srv in raw_services:
-                    if srv not in tasks_dict:
-                        tasks_dict[srv] = False
-
-                if tasks_dict:
-                    updated_tasks = {}
-                    completed_count = 0
-                    
-                    st.write("📌 **Check services upon completion (Tick ✔️):**")
-                    
-                    for service_name, status in tasks_dict.items():
-                        is_done = st.checkbox(service_name, value=status, key=f"task_{selected_id}_{service_name}")
-                        updated_tasks[service_name] = is_done
-                        if is_done:
-                            completed_count += 1
-                    
-                    total_tasks = len(updated_tasks)
-                    progress = completed_count / total_tasks if total_tasks > 0 else 0
-                    st.progress(progress)
-                    st.caption(f"{t['completion_rate']} {completed_count}/{total_tasks} ({int(progress * 100)}%)")
-                    
-                    if st.button(t["save_tasks"], type="primary"):
-                        c.execute("UPDATE clients SET tasks_status = ? WHERE id = ?", 
-                                  (json.dumps(updated_tasks, ensure_ascii=False), selected_id))
-                        conn.commit()
-                        st.success(t["tasks_saved"])
-                        st.rerun()
-                else:
-                    st.info("No services listed for this package.")
-            else:
-                st.warning(t["no_pkg_assigned"])
-        else:
-            st.info(t["no_clients"])
-            
+        st.dataframe(clients, use_container_width=True)
         conn.close()
 
-    # --- 5. Log Expense ---
-    elif choice == t["expenses"]:
-        st.title(f"💸 {t['expenses']}")
-        conn = get_db_connection()
-        c = conn.cursor()
-        
-        with st.form("add_expense_form"):
-            e_title = st.text_input(t["exp_title"])
-            e_amount = st.number_input(t["amount"], min_value=0.0)
-            e_cat = st.selectbox(t["category"], ["Operational", "Salaries", "Equipment", "Marketing", "Other"])
-            
-            if st.form_submit_button(t["log_exp_btn"], type="primary"):
-                if e_title and e_amount > 0:
-                    c.execute("INSERT INTO expenses (title, amount, category, added_by) VALUES (?, ?, ?, ?)",
-                              (e_title, e_amount, e_cat, st.session_state.user_info["name"]))
-                    conn.commit()
-                    st.success(t["exp_saved"])
-                else:
-                    st.error(t["exp_err"])
-        conn.close()
-
-    # --- 6. Packages Management (Supports Editor, Social & Web Tasks Parsing) ---
+    # --- Packages Hub (Simplified & Smart) ---
     elif choice == t["packages"]:
         st.title(f"📦 {t['packages']}")
         conn = get_db_connection()
@@ -1023,95 +587,72 @@ else:
         
         if role == "Owner":
             with st.expander(f"➕ {t['add_pkg']}"):
-                with st.form("add_package_form"):
+                with st.form("add_pkg_form"):
                     p_name = st.text_input(t["pkg_name"])
                     p_price = st.number_input(t["price"], min_value=0.0)
-                    p_duration = st.number_input(t["pkg_duration"], min_value=1, value=30, step=1)
-                    p_details = st.text_area(t["details"])
-                    p_editor_tasks = st.text_area(t["editor_tasks"])
-                    p_social_tasks = st.text_area(t["social_tasks"])
-                    p_web_tasks = st.text_area(t["web_tasks"])
+                    p_duration = st.number_input(t["pkg_duration"], min_value=1, value=30)
+                    p_details = st.text_area(t["details"], help="اكتب تفاصيل الباقة هنا بصورة طبيعية مثل: 30 بوست، 3 فيديوهات، 1 تصميم موقع")
                     
                     if st.form_submit_button(t["save"], type="primary"):
-                        c.execute("INSERT INTO packages (name, price, details, duration_days, editor_tasks, social_tasks, web_tasks) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                                  (p_name, p_price, p_details, int(p_duration), p_editor_tasks, p_social_tasks, p_web_tasks))
+                        c.execute("INSERT INTO packages (name, price, details, duration_days) VALUES (?, ?, ?, ?)",
+                                  (p_name, p_price, p_details, int(p_duration)))
                         conn.commit()
                         st.success("Package added successfully!")
                         st.rerun()
+
+        pkgs_df = pd.read_sql_query("SELECT id, name, price, duration_days, details FROM packages", conn)
+        st.dataframe(pkgs_df, use_container_width=True)
         
-        df_pkgs = pd.read_sql_query("SELECT id, name, price, duration_days, details, editor_tasks, social_tasks, web_tasks FROM packages", conn)
-        st.dataframe(df_pkgs, use_container_width=True)
-        
-        if role == "Owner" and not df_pkgs.empty:
+        if role == "Owner" and not pkgs_df.empty:
             st.divider()
-            st.subheader(f"🗑️ {t['delete_pkg']}")
-            pkg_to_delete = st.selectbox("Select Package to delete", df_pkgs["name"].tolist())
-            if st.button("Delete Selected Package", type="primary"):
-                c.execute("DELETE FROM packages WHERE name = ?", (pkg_to_delete,))
+            pkg_del = st.selectbox("Select Package to Delete", pkgs_df["name"].tolist())
+            if st.button(t["delete_pkg"], type="primary"):
+                c.execute("DELETE FROM packages WHERE name = ?", (pkg_del,))
                 conn.commit()
-                st.success(t["pkg_deleted"])
+                st.success("Package deleted!")
                 st.rerun()
         conn.close()
 
-    # --- 7. Full Audit Sheet (Owner Only) ---
+    # --- Log Expense ---
+    elif choice == t["expenses"]:
+        st.title(f"💸 {t['expenses']}")
+        conn = get_db_connection()
+        c = conn.cursor()
+        
+        with st.form("exp_form"):
+            e_title = st.text_input(t["exp_title"])
+            e_amt = st.number_input(t["amount"], min_value=0.0)
+            e_cat = st.selectbox(t["category"], ["Operational", "Salaries", "Marketing", "Other"])
+            if st.form_submit_button(t["log_exp_btn"], type="primary"):
+                if e_title and e_amt > 0:
+                    c.execute("INSERT INTO expenses (title, amount, category, added_by) VALUES (?, ?, ?, ?)",
+                              (e_title, e_amt, e_cat, st.session_state.user_info["name"]))
+                    conn.commit()
+                    st.success("Expense recorded!")
+        conn.close()
+
+    # --- Financial Audit Sheet (Owner Only) ---
     elif choice == t["audit"] and role == "Owner":
         st.title(f"📊 {t['audit']}")
         conn = get_db_connection()
         c = conn.cursor()
         
-        df_exp = pd.read_sql_query("SELECT id, title, amount, category, added_by, date FROM expenses", conn)
-        df_inc = pd.read_sql_query("SELECT id, client_name, package_name, amount, added_by, date FROM incomes", conn)
+        df_exp = pd.read_sql_query("SELECT * FROM expenses", conn)
+        df_inc = pd.read_sql_query("SELECT * FROM incomes", conn)
         
-        total_outcomes = df_exp['amount'].sum() if not df_exp.empty else 0.0
-        total_incomes = df_inc['amount'].sum() if not df_inc.empty else 0.0
-        net_profit = total_incomes - total_outcomes
+        tot_exp = df_exp['amount'].sum() if not df_exp.empty else 0.0
+        tot_inc = df_inc['amount'].sum() if not df_inc.empty else 0.0
+        net = tot_inc - tot_exp
         
-        col1, col2, col3 = st.columns(3)
-        col1.metric(t["total_inc"], f"{total_incomes:,.2f} EGP")
-        col2.metric(t["total_exp"], f"{total_outcomes:,.2f} EGP")
-        col3.metric(t["net_profit"], f"{net_profit:,.2f} EGP", delta=f"{net_profit:,.2f} EGP")
-        
-        st.divider()
+        c1, c2, c3 = st.columns(3)
+        c1.metric(t["total_inc"], f"{tot_inc:,.2f} EGP")
+        c2.metric(t["total_exp"], f"{tot_exp:,.2f} EGP")
+        c3.metric(t["net_profit"], f"{net:,.2f} EGP")
         
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df_summary = pd.DataFrame({
-                'Item' if st.session_state.lang == "EN" else 'البيان': ['Total Revenue', 'Total Expenses', 'Net Profit'] if st.session_state.lang == "EN" else ['إجمالي الإيرادات (الداخل)', 'إجمالي المصروفات (الخارج)', 'صافي الأرباح'],
-                'Amount (EGP)': [total_incomes, total_outcomes, net_profit]
-            })
-            df_summary.to_excel(writer, index=False, sheet_name='Summary')
             df_inc.to_excel(writer, index=False, sheet_name='Incomes')
             df_exp.to_excel(writer, index=False, sheet_name='Expenses')
-            
-        excel_data = output.getvalue()
         
-        st.download_button(
-            label=t["export_excel"],
-            data=excel_data,
-            file_name="focal_craft_financial_audit.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
-        
-        tab_inc, tab_exp = st.tabs(["🟢 Revenue (Incomes)" if st.session_state.lang == "EN" else "🟢 الإيرادات (الداخل للشركة)", 
-                                    "🔴 Expenses (Outcomes)" if st.session_state.lang == "EN" else "🔴 المصروفات (الخارج من الشركة)"])
-        
-        with tab_inc:
-            st.subheader("📋 Client Subscriptions & Revenue List" if st.session_state.lang == "EN" else "📋 قائمة اشتراكات العملاء والإيرادات")
-            st.dataframe(df_inc, use_container_width=True)
-            
-        with tab_exp:
-            st.subheader("📋 Operational Expenses List" if st.session_state.lang == "EN" else "📋 قائمة المصروفات التشغيلية")
-            st.dataframe(df_exp, use_container_width=True)
-            
-            if not df_exp.empty:
-                st.divider()
-                st.subheader(f"🗑️ {t['delete_exp']}")
-                exp_to_delete = st.selectbox("Select Expense ID to delete:" if st.session_state.lang == "EN" else "اختر رقم المصروف لمسحه:", df_exp["id"].tolist())
-                if st.button("Delete Selected Expense" if st.session_state.lang == "EN" else "مسح المصروف المحدد", type="primary"):
-                    c.execute("DELETE FROM expenses WHERE id = ?", (exp_to_delete,))
-                    conn.commit()
-                    st.success(t["exp_deleted"])
-                    st.rerun()
-                
+        st.download_button(t["export_excel"], data=output.getvalue(), file_name="audit_sheet.xlsx", use_container_width=True)
         conn.close()
